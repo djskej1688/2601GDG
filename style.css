@@ -2,7 +2,7 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #0b1a2b; /* 네이비 */
+  background: linear-gradient(135deg, #1f3d2b, #2f5e3f, #0f2a1c);
   height: 100vh; /* 화면 전체 높이 */
   display: flex;
   justify-content: center; /* 가로 중앙 */
@@ -18,13 +18,15 @@ body {
 h1 {
   font-family: 'SairaStencil', sans-serif;
   font-size: 80px;
-  color: #faecec;
+  color: #fffab9;
   writing-mode: vertical-rl;
 
   /* 추가 */
-  transition: 0.3s;
+  transition: 0.5s;
 }
 
 h1:hover {
-  color: #c9353b;
+  background: linear-gradient(167deg, #fffab9, #ffbec1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
