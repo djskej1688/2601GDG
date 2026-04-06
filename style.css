@@ -1,0 +1,30 @@
+/* 전체 기본 설정 */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0b1a2b; /* 네이비 */
+  height: 100vh; /* 화면 전체 높이 */
+  display: flex;
+  justify-content: center; /* 가로 중앙 */
+  align-items: center;     /* 세로 중앙 */
+}
+
+/* 폰트 적용 */
+@font-face {
+  font-family: 'SairaStencil';
+  src: url('Saira.ttf'); /* 파일 이름 맞춰야 함 */
+}
+
+h1 {
+  font-family: 'SairaStencil', sans-serif;
+  font-size: 80px;
+  color: #faecec;
+  writing-mode: vertical-rl;
+
+  /* 추가 */
+  transition: 0.3s;
+}
+
+h1:hover {
+  color: #c9353b;
+}
