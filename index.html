@@ -2,14 +2,56 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>welcome</title>
+  <title>welcome.</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="container">
-    <h1>welcome.</h1>
+  <section class="welcome">
+    <h1 onclick="goAbout()">welcome.</h1>
+  </section>
+
+  <section class="about">
+  <div class="slider">
+
+    <div class="panel intro">
+      <h2>about.</h2>
+    </div>
+
+    <div class="panel content">
+
+      <div class="top-info">
+        <p class="school">Hongik Univ.</p>
+        <p class="dept">Department of Liberal Studies</p>
+      </div>
+
+      <div class="main-info">
+        <img src="3.jpg" class="profile-img">
+
+
+        <p class="desc">
+          미래에 직접 만든 툴로 제약분야에서 근무하고 싶습니다. </p>
+        <p class="lang">
+          I use <a href="./python.html">Python</a>.
+        </p>
+      </div>
+
+    </div>
+
   </div>
+</section>
+  <script>
+    function goAbout() {
+      document.querySelector('.about').scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+
+      document.querySelector('.intro').onclick = function() {
+      document.querySelector('.intro').style.transform = 'translateX(33vw)';
+      document.querySelector('.content').style.transform = 'translateX(0)';
+    };
+  </script>
 
 </body>
 </html>

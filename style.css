@@ -1,38 +1,172 @@
-/* 전체 기본 설정 */
 body {
   margin: 0;
   padding: 0;
   background: radial-gradient(
-    ellipse at 37% 54%, 
-    #223d14 3%, 
+    ellipse at 37% 54%,
+    #223d14 3%,
     #ffffae 90%
-    );
-  height: 100vh; /* 화면 전체 높이 */
-  display: flex;
-  justify-content: center; /* 가로 중앙 */
-  align-items: center;     /* 세로 중앙 */
+  );
 }
 
-/* 폰트 적용 */
 @font-face {
   font-family: 'SairaStencil';
-  src: url('Saira.ttf'); /* 파일 이름 맞춰야 함 */
+  src: url('Saira.ttf');
 }
 
-h1 {
+@font-face {
+  font-family: 'NotoSerifKR';
+  src: url('Noto.ttf');
+}
+
+h1, h2 {
   font-family: 'SairaStencil', sans-serif;
   font-size: 30px;
   color: #fffde8;
   writing-mode: vertical-rl;
-
-  /* 추가 */
-  
+  margin: 0;
 }
 
-h1:hover {
+h1:hover, h2:hover {
   background: linear-gradient(167deg, #fffab9, #ffdddf);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-
   transition: 0.35s;
+}
+
+.welcome {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about {
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  color: #223d14;
+  font-family: sans-serif;
+}
+
+.slider {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.7s ease;
+}
+
+.intro {
+  z-index: 2;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  transform: translateX(100vw);
+  justify-content: flex-start;
+  padding-left: 12vw;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+
+a {
+  color: #fff7e1;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+a:hover {
+  color: #f50eca;
+  text-decoration: underline;
+}
+
+.content p {
+  font-family: 'NotoSerifKR', serif;
+  color: #1a2e12;
+
+  font-size: 18px;
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+
+  opacity: 0.9;
+  max-width: 520px;
+}
+
+.top-info { 
+  position: absolute; 
+  top: 10vh; 
+}
+
+.main-info {
+  position: absolute;
+  top: 25vh;
+  left: 12vw;
+}
+
+/* 학교 */
+.school {
+  font-size: 17px;
+  font-weight: 700;  /* 볼드 */
+  margin-bottom: 0;
+}
+
+/* 학과 */
+.dept {
+  font-size: 15px;
+  font-weight: 400;
+
+}
+
+.school,
+.dept {
+  margin: 0;
+  line-height: 1;  /* 거의 붙음 */
+}
+
+/* 설명 */
+.desc {
+  font-size: 15px;
+  line-height: 1.8;
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+/* 언어 */
+.lang {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.profile-img {
+  width: 220px;   /* 크기 */
+  height: auto;
+  position: relative;
+  left: 0;
+
+  border-radius: 5px; /* 살짝 둥글게 (감성) */
+
+  display: block;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  transition: 0.3s;
+
+  margin-bottom: 50px; /* 텍스트랑 간격 */
+}
+
+.profile-img:hover {
+  transform: scale(1.05);
 }
