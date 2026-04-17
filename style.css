@@ -109,12 +109,14 @@ a:hover {
 .top-info { 
   position: absolute; 
   top: 10vh; 
+  transition-delay: 0.2s;
 }
 
 .main-info {
   position: absolute;
   top: 25vh;
   left: 12vw;
+  transition-delay: 0.5s;
 }
 
 /* 학교 */
@@ -169,4 +171,17 @@ a:hover {
 
 .profile-img:hover {
   transform: scale(1.05);
+}
+
+/* 초기 상태 (안 보이게) */
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s ease;
+}
+
+/* 🔥 나타난 상태 */
+.fade-up.show {
+  opacity: 1;
+  transform: translateY(0);
 }
