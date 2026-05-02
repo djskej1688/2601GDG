@@ -1,14 +1,21 @@
+html {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
+  min-height: 200vh;
   background: radial-gradient(
     ellipse at 37% 54%,
     #223d14 3%,
     #ffffae 90%
   );
+  background-repeat: no-repeat;
+  background-size: 100% 200vh;
 }
 
-/* fonts */
+/* 폰트 */
 @font-face {
   font-family: 'SairaStencil';
   src: url('Saira.ttf');
@@ -19,7 +26,7 @@ body {
   src: url('Noto.ttf');
 }
 
-/* common text */
+/* welcome. / about. */
 h1,
 h2 {
   font-family: 'SairaStencil', sans-serif;
@@ -31,30 +38,33 @@ h2 {
 }
 
 h1:hover,
-h2:hover {
+h2:hover,
+.detail-menu a:hover {
   background: linear-gradient(167deg, #fffab9, #ffdddf);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   transition: 0.35s;
 }
 
-/* first page */
+/* 첫 화면 */
 .welcome {
   height: 100vh;
+  background: transparent;
+
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* about section */
+/* about 화면 */
 .about {
   position: relative;
   height: 100vh;
   overflow: hidden;
-  background: #223d14;
+  background: transparent;
 }
 
-/* background video */
+/* 배경 영상 */
 .video-screen {
   position: absolute;
   inset: 0;
@@ -63,11 +73,10 @@ h2:hover {
   width: 100vw;
   height: 100vh;
 
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  opacity: 1;
 }
 
-.about.started .video-screen {
+.about.video-on .video-screen {
   opacity: 1;
 }
 
@@ -75,24 +84,57 @@ h2:hover {
   width: 100vw;
   height: 100vh;
   object-fit: cover;
-
-  /*
-    영상 첫 재생 색 튐을 덜 보이게 하는 보정.
-    너무 진하면 숫자 낮춰도 됨.
-  */
-  filter: saturate(1.08) contrast(1.03);
+  filter: none;
+  display: block;
 }
 
-/* 얇은 색감 필터 */
+.video-screen::before,
 .video-screen::after {
   content: "";
   position: absolute;
-  inset: 0;
-  background: rgba(34, 61, 20, 0.12);
+  left: 0;
+  width: 100%;
+  height: 64vh;
+  background: radial-gradient(
+    ellipse at 37% 54%,
+    #223d14 3%,
+    #ffffae 90%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 200vh;
+  background-position: 0 -100vh;
+  opacity: 1;
   pointer-events: none;
+  transition: transform 1.3s ease 0.08s, opacity 1.3s ease 0.08s;
 }
 
-/* layer above video */
+.video-screen::before {
+  top: 0;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
+}
+
+.video-screen::after {
+  bottom: 0;
+  background-position: 0 -136vh;
+  -webkit-mask-image: linear-gradient(to top, #000 0%, #000 58%, transparent 100%);
+  mask-image: linear-gradient(to top, #000 0%, #000 58%, transparent 100%);
+}
+
+.about.video-on .video-screen::before,
+.about.video-on .video-screen::after {
+  opacity: 0;
+}
+
+.about.video-on .video-screen::before {
+  transform: translateY(-6vh);
+}
+
+.about.video-on .video-screen::after {
+  transform: translateY(6vh);
+}
+
+/* about / menu / content layer */
 .slider {
   position: relative;
   z-index: 2;
@@ -102,7 +144,7 @@ h2:hover {
 
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.9s ease;
+  transition: opacity 1.25s ease;
 }
 
 .about.text-visible .slider {
@@ -110,7 +152,7 @@ h2:hover {
   pointer-events: auto;
 }
 
-/* panels */
+/* 공통 패널 */
 .panel {
   position: absolute;
   top: 0;
@@ -124,22 +166,23 @@ h2:hover {
   align-items: center;
 }
 
+/* about. */
 .intro {
   z-index: 4;
-  transition: transform 0.7s ease;
+  transition: transform 1.15s ease-in-out;
 }
 
 .about.open .intro {
   transform: translateX(33vw);
 }
 
-/* detail menu */
+/* detail menu: 기존처럼 about.이랑 같이 움직임 */
 .detail-menu {
   position: absolute;
   z-index: 5;
 
   top: 50%;
-  left: 38vw;
+  left: calc(50% - 160px);
   transform: translateY(-50%);
 
   display: flex;
@@ -149,32 +192,28 @@ h2:hover {
   opacity: 0;
   pointer-events: none;
 
-  transition: opacity 0.7s ease;
+  transition: opacity 1s ease 0.45s;
 }
 
-.about.open .detail-menu {
+.intro.open .detail-menu {
   opacity: 1;
   pointer-events: auto;
 }
 
 .detail-menu a {
   font-family: 'SairaStencil', sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   color: #fffde8;
   text-decoration: none;
   transition: 0.3s;
 }
 
-.detail-menu a:hover {
-  color: #f50eca;
-}
-
-/* content */
+/* 자기소개 */
 .content {
   z-index: 3;
 
   opacity: 0;
-  transition: opacity 0.8s ease;
+  transition: opacity 1.2s ease 0.35s;
 
   color: #1a2e12;
 }
@@ -183,6 +222,7 @@ h2:hover {
   opacity: 1;
 }
 
+/* 학교 / 소속 */
 .top-info {
   position: absolute;
   top: 10vh;
@@ -190,9 +230,10 @@ h2:hover {
 
   opacity: 0;
   transform: translateY(35px);
-  transition: all 0.8s ease 0.15s;
+  transition: opacity 1.05s ease 0.75s, transform 1.05s ease 0.75s;
 }
 
+/* 설명 / 언어 */
 .main-info {
   position: absolute;
   top: 25vh;
@@ -200,7 +241,7 @@ h2:hover {
 
   opacity: 0;
   transform: translateY(35px);
-  transition: all 0.8s ease 0.35s;
+  transition: opacity 1.05s ease 0.95s, transform 1.05s ease 0.95s;
 }
 
 .about.open .top-info,
@@ -209,7 +250,7 @@ h2:hover {
   transform: translateY(0);
 }
 
-/* text details */
+/* 자기소개 폰트: 원래대로 NotoSerifKR */
 .content p {
   font-family: 'NotoSerifKR', serif;
   color: #1a2e12;
@@ -217,40 +258,46 @@ h2:hover {
   max-width: 520px;
 }
 
+/* 학교 */
 .school {
   font-size: 17px;
-  font-weight: 700;
+  font-weight: 800;
   margin: 0;
   line-height: 1;
 }
 
+/* 학부 */
 .dept {
   font-size: 15px;
-  font-weight: 400;
+  font-weight: 800;
   margin: 0;
   line-height: 1;
 }
 
+/* 설명 */
 .desc {
   font-size: 15px;
   line-height: 1.8;
   font-weight: 500;
-  margin-bottom: 0;
+  margin: 0 0 24px 0;
 }
 
+/* 언어 */
 .lang {
   font-size: 15px;
   font-weight: 600;
+  margin: 0;
 }
 
-/* links */
-a {
+/* Python 링크 */
+.content a {
+  font-family: 'NotoSerifKR', serif;
   color: #fff7e1;
   text-decoration: none;
   transition: 0.3s;
 }
 
-a:hover {
+.content a:hover {
   color: #f50eca;
   text-decoration: underline;
 }

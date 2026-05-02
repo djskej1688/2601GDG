@@ -14,29 +14,26 @@
 
   <section class="about" id="about">
 
-    <!-- 배경 영상 -->
     <div class="video-screen">
       <video
         id="introVideo"
         src="video1.mp4"
         muted
-        autoplay
         playsinline
         loop
         preload="auto">
       </video>
     </div>
 
-    <!-- about / 메뉴 / 자기소개 레이어 -->
     <div class="slider">
 
-      <div class="detail-menu">
-        <a href="./input.html">Input</a>
-        <a href="./dandelion.html">dandelion</a>
-        <a href="./untitled.html">untitled</a>
-      </div>
-
       <div class="panel intro">
+        <div class="detail-menu">
+          <a href="./input.html">Input</a>
+          <a href="./dandelion.html">dandelion</a>
+          <a href="./untitled.html">untitled</a>
+        </div>
+
         <h2>about.</h2>
       </div>
 
@@ -68,37 +65,144 @@
     const intro = document.querySelector('.intro');
     const video = document.querySelector('#introVideo');
 
-    let hasStarted = false;
+    let isOpen = false;
+    let warmupTimer = null;
+    let sequenceTimers = [];
+    const videoStartTime = 0;
+    const scrollDuration = 1050;
+    const videoFadeDuration = 1100;
+
+    function clearSequenceTimers() {
+      sequenceTimers.forEach(timer => clearTimeout(timer));
+      sequenceTimers = [];
+
+      if (warmupTimer !== null) {
+        clearTimeout(warmupTimer);
+        warmupTimer = null;
+      }
+    }
+
+    function resetAboutState() {
+      about.classList.remove('video-on');
+      about.classList.remove('text-visible');
+      about.classList.remove('open');
+      intro.classList.remove('open');
+
+      isOpen = false;
+    }
+
+    function openAbout() {
+      about.classList.add('open');
+      intro.classList.add('open');
+      isOpen = true;
+    }
+
+    function closeAbout() {
+      about.classList.remove('open');
+      intro.classList.remove('open');
+      isOpen = false;
+    }
+
+    function waitForVideoEvent(eventName, fallbackTime = 700) {
+      return Promise.race([
+        new Promise(resolve => {
+          video.addEventListener(eventName, resolve, { once: true });
+        }),
+        new Promise(resolve => {
+          setTimeout(resolve, fallbackTime);
+        })
+      ]);
+    }
+
+    async function resetVideoToBeginning() {
+      if (video.readyState < 1) {
+        video.load();
+        await waitForVideoEvent('loadedmetadata');
+      }
+
+      video.pause();
+      video.currentTime = videoStartTime;
+      await waitForVideoEvent('seeked');
+    }
+
+    async function playVideoFromBeginning() {
+      try {
+        video.currentTime = videoStartTime;
+        await waitForVideoEvent('seeked', 250);
+
+        await video.play();
+      } catch (error) {
+        console.log('video play failed:', error);
+      }
+    }
+
+    function startVideoSequence() {
+      if (warmupTimer !== null) {
+        clearTimeout(warmupTimer);
+        warmupTimer = null;
+      }
+
+      about.classList.add('video-on');
+
+      sequenceTimers.push(
+        setTimeout(() => {
+          playVideoFromBeginning();
+        }, Math.max(scrollDuration, videoFadeDuration + 150))
+      );
+
+      sequenceTimers.push(
+        setTimeout(() => {
+          about.classList.add('text-visible');
+        }, scrollDuration + 1200)
+      );
+
+      sequenceTimers.push(
+        setTimeout(() => {
+          openAbout();
+        }, scrollDuration + 3200)
+      );
+    }
 
     function goAbout() {
+      clearSequenceTimers();
+      resetAboutState();
+
       about.scrollIntoView({
         behavior: 'smooth'
       });
 
-      video.play().catch(error => {
-        console.log('video play failed:', error);
+      resetVideoToBeginning().catch(error => {
+        console.log('video seek failed:', error);
       });
-
-      if (hasStarted) return;
-      hasStarted = true;
-
-      // 영상 배경 바로 노출
-      about.classList.add('started');
-
-      // 2초 뒤 about. 등장
-      setTimeout(() => {
-        about.classList.add('text-visible');
-      }, 2000);
-
-      // about. 등장 1초 뒤 자동 오픈
-      setTimeout(() => {
-        about.classList.add('open');
-      }, 3000);
+      startVideoSequence();
     }
 
     intro.addEventListener('click', () => {
       if (!about.classList.contains('text-visible')) return;
-      about.classList.toggle('open');
+
+      if (isOpen) {
+        closeAbout();
+      } else {
+        openAbout();
+      }
+    });
+
+    window.addEventListener('load', () => {
+      video.load();
+
+      video.play()
+        .then(() => {
+          warmupTimer = setTimeout(() => {
+            video.pause();
+            video.currentTime = videoStartTime;
+          }, 1200);
+        })
+        .catch(error => {
+          console.log('video warmup failed:', error);
+          resetVideoToBeginning().catch(seekError => {
+            console.log('video seek failed:', seekError);
+          });
+        });
     });
   </script>
 
