@@ -18,15 +18,18 @@ body {
   src: url('Noto.ttf');
 }
 
-h1, h2 {
+h1,
+h2 {
   font-family: 'SairaStencil', sans-serif;
   font-size: 30px;
   color: #fffde8;
   writing-mode: vertical-rl;
   margin: 0;
+  cursor: pointer;
 }
 
-h1:hover, h2:hover {
+h1:hover,
+h2:hover {
   background: linear-gradient(167deg, #fffab9, #ffdddf);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -48,21 +51,59 @@ h1:hover, h2:hover {
   font-family: sans-serif;
 }
 
-.slider {
-  position: relative;
+/* 영상 배경 */
+.video-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
   width: 100vw;
   height: 100vh;
+
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+
+.video-screen.show {
+  opacity: 1;
+}
+
+.video-screen video {
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+}
+
+/* about / content 레이어 */
+.slider {
+  position: relative;
+  z-index: 2;
+
+  width: 100vw;
+  height: 100vh;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+.slider.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .panel {
   position: absolute;
   top: 0;
   left: 0;
+
   width: 100vw;
   height: 100vh;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
   transition: transform 0.7s ease;
 }
 
@@ -73,27 +114,55 @@ h1:hover, h2:hover {
 .content {
   position: relative;
   z-index: 1;
-  transform: translateX(100vw);
-  justify-content: flex-start;
-  padding-left: 12vw;
-  box-sizing: border-box;
+
+  transform: translateX(0);
+
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
+
+  padding-left: 12vw;
+  box-sizing: border-box;
+
+  opacity: 0;
+  transition: opacity 0.5s ease;
 }
 
+/* 상세 메뉴 */
+.detail-menu {
+  position: absolute;
+  top: 50%;
+  left: calc(50% - 170px);
+  transform: translateY(-50%);
 
-a {
-  color: #fff7e1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.6s ease;
+}
+
+.detail-menu a {
+  font-family: 'SairaStencil', sans-serif;
+  font-size: 18px;
+  color: #fffde8;
   text-decoration: none;
   transition: 0.3s;
 }
 
-a:hover {
+.detail-menu a:hover {
   color: #f50eca;
-  text-decoration: underline;
 }
 
+.intro.open .detail-menu {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 자기소개 텍스트 */
 .content p {
   font-family: 'NotoSerifKR', serif;
   color: #1a2e12;
@@ -106,9 +175,10 @@ a:hover {
   max-width: 520px;
 }
 
-.top-info { 
-  position: absolute; 
-  top: 10vh; 
+.top-info {
+  position: absolute;
+  top: 10vh;
+  left: 12vw;
   transition-delay: 0.2s;
 }
 
@@ -119,27 +189,20 @@ a:hover {
   transition-delay: 0.5s;
 }
 
-/* 학교 */
 .school {
   font-size: 17px;
-  font-weight: 700;  /* 볼드 */
-  margin-bottom: 0;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
 }
 
-/* 학과 */
 .dept {
   font-size: 15px;
   font-weight: 400;
-
-}
-
-.school,
-.dept {
   margin: 0;
-  line-height: 1;  /* 거의 붙음 */
+  line-height: 1;
 }
 
-/* 설명 */
 .desc {
   font-size: 15px;
   line-height: 1.8;
@@ -147,40 +210,29 @@ a:hover {
   margin-bottom: 0;
 }
 
-/* 언어 */
 .lang {
   font-size: 15px;
   font-weight: 600;
 }
 
-.profile-img {
-  width: 220px;   /* 크기 */
-  height: auto;
-  position: relative;
-  left: 0;
-
-  border-radius: 5px; /* 살짝 둥글게 (감성) */
-
-  display: block;
-
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+a {
+  color: #fff7e1;
+  text-decoration: none;
   transition: 0.3s;
-
-  margin-bottom: 50px; /* 텍스트랑 간격 */
 }
 
-.profile-img:hover {
-  transform: scale(1.05);
+a:hover {
+  color: #f50eca;
+  text-decoration: underline;
 }
 
-/* 초기 상태 (안 보이게) */
+/* fade-up 애니메이션 */
 .fade-up {
   opacity: 0;
   transform: translateY(40px);
   transition: all 0.8s ease;
 }
 
-/* 🔥 나타난 상태 */
 .fade-up.show {
   opacity: 1;
   transform: translateY(0);

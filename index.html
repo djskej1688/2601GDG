@@ -5,6 +5,7 @@
   <title>welcome.</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <section class="welcome">
@@ -12,59 +13,121 @@
   </section>
 
   <section class="about">
-  <div class="slider">
 
-    <div class="panel intro">
-      <h2>about.</h2>
+    <div class="video-screen">
+      <video
+        id="introVideo"
+        src="video1.mp4"
+        muted
+        playsinline
+        loop
+        preload="auto">
+      </video>
     </div>
 
-    <div class="panel content">
+    <div class="slider">
 
-      <div class="top-info fade-up">
-        <p class="school">Hongik Univ.</p>
-        <p class="dept">Department of Liberal Studies</p>
+      <div class="panel intro">
+        <div class="detail-menu">
+          <a href="./input.html">Input</a>
+          <a href="./dandelion.html">dandelion</a>
+          <a href="./untitled.html">untitled</a>
+        </div>
+
+        <h2>about.</h2>
       </div>
 
-      <div class="main-info fade-up">
-        <img src="3.jpg" class="profile-img">
+      <div class="panel content">
 
+        <div class="top-info fade-up">
+          <p class="school">Hongik Univ.</p>
+          <p class="dept">Department of Liberal Studies</p>
+        </div>
 
-        <p class="desc">
-          미래에 직접 만든 툴로 제약분야에서 종사하고 싶습니다. </p>
-        <p class="lang">
-          I use <a href="./python.html">Python</a>.
-        </p>
+        <div class="main-info fade-up">
+          <p class="desc">
+            미래에 직접 만든 툴로 제약분야에서 종사하고 싶습니다.
+          </p>
+
+          <p class="lang">
+            I use <a href="./python.html">Python</a>.
+          </p>
+        </div>
+
       </div>
 
     </div>
 
-  </div>
-</section>
+  </section>
+
   <script>
+    const intro = document.querySelector('.intro');
+    const content = document.querySelector('.content');
+    const slider = document.querySelector('.slider');
+    const videoScreen = document.querySelector('.video-screen');
+    const video = document.querySelector('#introVideo');
+
+    let isOpen = false;
+
+    window.addEventListener('load', () => {
+      video.load();
+      video.currentTime = 0.01;
+    });
+
     function goAbout() {
-      document.querySelector('.about').scrollIntoView({
+      const about = document.querySelector('.about');
+
+      about.scrollIntoView({
         behavior: 'smooth'
       });
+
+      setTimeout(() => {
+        videoScreen.classList.add('show');
+
+        video.currentTime = 0.01;
+        video.play().catch(error => {
+          console.log('video play failed:', error);
+        });
+
+        setTimeout(() => {
+          slider.classList.add('show');
+        }, 2000);
+
+        setTimeout(() => {
+          intro.style.transform = 'translateX(33vw)';
+          intro.classList.add('open');
+          content.style.opacity = '1';
+          isOpen = true;
+        }, 3000);
+
+      }, 800);
     }
 
-      document.querySelector('.intro').onclick = function() {
-      document.querySelector('.intro').style.transform = 'translateX(33vw)';
-      document.querySelector('.content').style.transform = 'translateX(0)';
-    };
-  </script>
-
-  <script>
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('show');
+    intro.onclick = function() {
+      if (!isOpen) {
+        intro.style.transform = 'translateX(33vw)';
+        intro.classList.add('open');
+        content.style.opacity = '1';
+      } else {
+        intro.style.transform = 'translateX(0)';
+        intro.classList.remove('open');
+        content.style.opacity = '0';
       }
-    });
-  });
 
-  document.querySelectorAll('.fade-up').forEach(el => {
-    observer.observe(el);
-  });
+      isOpen = !isOpen;
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('show');
+        }
+      });
+    });
+
+    document.querySelectorAll('.fade-up').forEach(el => {
+      observer.observe(el);
+    });
   </script>
 
 </body>
