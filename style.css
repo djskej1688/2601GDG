@@ -8,6 +8,7 @@ body {
   );
 }
 
+/* fonts */
 @font-face {
   font-family: 'SairaStencil';
   src: url('Saira.ttf');
@@ -18,6 +19,7 @@ body {
   src: url('Noto.ttf');
 }
 
+/* common text */
 h1,
 h2 {
   font-family: 'SairaStencil', sans-serif;
@@ -36,6 +38,7 @@ h2:hover {
   transition: 0.35s;
 }
 
+/* first page */
 .welcome {
   height: 100vh;
   display: flex;
@@ -43,15 +46,15 @@ h2:hover {
   align-items: center;
 }
 
+/* about section */
 .about {
+  position: relative;
   height: 100vh;
   overflow: hidden;
-  position: relative;
-  color: #223d14;
-  font-family: sans-serif;
+  background: #223d14;
 }
 
-/* 영상 배경 */
+/* background video */
 .video-screen {
   position: absolute;
   inset: 0;
@@ -61,10 +64,10 @@ h2:hover {
   height: 100vh;
 
   opacity: 0;
-  transition: opacity 0.8s ease;
+  transition: opacity 0.4s ease;
 }
 
-.video-screen.show {
+.about.started .video-screen {
   opacity: 1;
 }
 
@@ -72,9 +75,24 @@ h2:hover {
   width: 100vw;
   height: 100vh;
   object-fit: cover;
+
+  /*
+    영상 첫 재생 색 튐을 덜 보이게 하는 보정.
+    너무 진하면 숫자 낮춰도 됨.
+  */
+  filter: saturate(1.08) contrast(1.03);
 }
 
-/* about / content 레이어 */
+/* 얇은 색감 필터 */
+.video-screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(34, 61, 20, 0.12);
+  pointer-events: none;
+}
+
+/* layer above video */
 .slider {
   position: relative;
   z-index: 2;
@@ -84,14 +102,15 @@ h2:hover {
 
   opacity: 0;
   pointer-events: none;
-  transition: opacity 1s ease;
+  transition: opacity 0.9s ease;
 }
 
-.slider.show {
+.about.text-visible .slider {
   opacity: 1;
   pointer-events: auto;
 }
 
+/* panels */
 .panel {
   position: absolute;
   top: 0;
@@ -103,36 +122,24 @@ h2:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-
-  transition: transform 0.7s ease;
 }
 
 .intro {
-  z-index: 2;
+  z-index: 4;
+  transition: transform 0.7s ease;
 }
 
-.content {
-  position: relative;
-  z-index: 1;
-
-  transform: translateX(0);
-
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-
-  padding-left: 12vw;
-  box-sizing: border-box;
-
-  opacity: 0;
-  transition: opacity 0.5s ease;
+.about.open .intro {
+  transform: translateX(33vw);
 }
 
-/* 상세 메뉴 */
+/* detail menu */
 .detail-menu {
   position: absolute;
+  z-index: 5;
+
   top: 50%;
-  left: calc(50% - 170px);
+  left: 38vw;
   transform: translateY(-50%);
 
   display: flex;
@@ -142,7 +149,12 @@ h2:hover {
   opacity: 0;
   pointer-events: none;
 
-  transition: opacity 0.6s ease;
+  transition: opacity 0.7s ease;
+}
+
+.about.open .detail-menu {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .detail-menu a {
@@ -157,36 +169,52 @@ h2:hover {
   color: #f50eca;
 }
 
-.intro.open .detail-menu {
-  opacity: 1;
-  pointer-events: auto;
+/* content */
+.content {
+  z-index: 3;
+
+  opacity: 0;
+  transition: opacity 0.8s ease;
+
+  color: #1a2e12;
 }
 
-/* 자기소개 텍스트 */
-.content p {
-  font-family: 'NotoSerifKR', serif;
-  color: #1a2e12;
-
-  font-size: 18px;
-  line-height: 1.8;
-  letter-spacing: 0.5px;
-
-  opacity: 0.9;
-  max-width: 520px;
+.about.open .content {
+  opacity: 1;
 }
 
 .top-info {
   position: absolute;
   top: 10vh;
   left: 12vw;
-  transition-delay: 0.2s;
+
+  opacity: 0;
+  transform: translateY(35px);
+  transition: all 0.8s ease 0.15s;
 }
 
 .main-info {
   position: absolute;
   top: 25vh;
   left: 12vw;
-  transition-delay: 0.5s;
+
+  opacity: 0;
+  transform: translateY(35px);
+  transition: all 0.8s ease 0.35s;
+}
+
+.about.open .top-info,
+.about.open .main-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* text details */
+.content p {
+  font-family: 'NotoSerifKR', serif;
+  color: #1a2e12;
+  letter-spacing: 0.5px;
+  max-width: 520px;
 }
 
 .school {
@@ -215,6 +243,7 @@ h2:hover {
   font-weight: 600;
 }
 
+/* links */
 a {
   color: #fff7e1;
   text-decoration: none;
@@ -224,16 +253,4 @@ a {
 a:hover {
   color: #f50eca;
   text-decoration: underline;
-}
-
-/* fade-up 애니메이션 */
-.fade-up {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 0.8s ease;
-}
-
-.fade-up.show {
-  opacity: 1;
-  transform: translateY(0);
 }

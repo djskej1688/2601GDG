@@ -12,39 +12,42 @@
     <h1 onclick="goAbout()">welcome.</h1>
   </section>
 
-  <section class="about">
+  <section class="about" id="about">
 
+    <!-- 배경 영상 -->
     <div class="video-screen">
       <video
         id="introVideo"
         src="video1.mp4"
         muted
+        autoplay
         playsinline
         loop
         preload="auto">
       </video>
     </div>
 
+    <!-- about / 메뉴 / 자기소개 레이어 -->
     <div class="slider">
 
-      <div class="panel intro">
-        <div class="detail-menu">
-          <a href="./input.html">Input</a>
-          <a href="./dandelion.html">dandelion</a>
-          <a href="./untitled.html">untitled</a>
-        </div>
+      <div class="detail-menu">
+        <a href="./input.html">Input</a>
+        <a href="./dandelion.html">dandelion</a>
+        <a href="./untitled.html">untitled</a>
+      </div>
 
+      <div class="panel intro">
         <h2>about.</h2>
       </div>
 
       <div class="panel content">
 
-        <div class="top-info fade-up">
+        <div class="top-info">
           <p class="school">Hongik Univ.</p>
           <p class="dept">Department of Liberal Studies</p>
         </div>
 
-        <div class="main-info fade-up">
+        <div class="main-info">
           <p class="desc">
             미래에 직접 만든 툴로 제약분야에서 종사하고 싶습니다.
           </p>
@@ -61,72 +64,41 @@
   </section>
 
   <script>
+    const about = document.querySelector('.about');
     const intro = document.querySelector('.intro');
-    const content = document.querySelector('.content');
-    const slider = document.querySelector('.slider');
-    const videoScreen = document.querySelector('.video-screen');
     const video = document.querySelector('#introVideo');
 
-    let isOpen = false;
-
-    window.addEventListener('load', () => {
-      video.load();
-      video.currentTime = 0.01;
-    });
+    let hasStarted = false;
 
     function goAbout() {
-      const about = document.querySelector('.about');
-
       about.scrollIntoView({
         behavior: 'smooth'
       });
 
+      video.play().catch(error => {
+        console.log('video play failed:', error);
+      });
+
+      if (hasStarted) return;
+      hasStarted = true;
+
+      // 영상 배경 바로 노출
+      about.classList.add('started');
+
+      // 2초 뒤 about. 등장
       setTimeout(() => {
-        videoScreen.classList.add('show');
+        about.classList.add('text-visible');
+      }, 2000);
 
-        video.currentTime = 0.01;
-        video.play().catch(error => {
-          console.log('video play failed:', error);
-        });
-
-        setTimeout(() => {
-          slider.classList.add('show');
-        }, 2000);
-
-        setTimeout(() => {
-          intro.style.transform = 'translateX(33vw)';
-          intro.classList.add('open');
-          content.style.opacity = '1';
-          isOpen = true;
-        }, 3000);
-
-      }, 800);
+      // about. 등장 1초 뒤 자동 오픈
+      setTimeout(() => {
+        about.classList.add('open');
+      }, 3000);
     }
 
-    intro.onclick = function() {
-      if (!isOpen) {
-        intro.style.transform = 'translateX(33vw)';
-        intro.classList.add('open');
-        content.style.opacity = '1';
-      } else {
-        intro.style.transform = 'translateX(0)';
-        intro.classList.remove('open');
-        content.style.opacity = '0';
-      }
-
-      isOpen = !isOpen;
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('show');
-        }
-      });
-    });
-
-    document.querySelectorAll('.fade-up').forEach(el => {
-      observer.observe(el);
+    intro.addEventListener('click', () => {
+      if (!about.classList.contains('text-visible')) return;
+      about.classList.toggle('open');
     });
   </script>
 
