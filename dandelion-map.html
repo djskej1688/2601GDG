@@ -1,60 +1,14 @@
 <!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta name="description" content="dandellas — 학교 공부, 연구와 프로젝트, 사진과 경험을 기록합니다.">
-  <title>dandelion — 연구와 프로젝트 · dandellas</title>
-  <link rel="icon" href="./assets/seed.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./fonts.css">
-  <link rel="stylesheet" href="./style.css">
-  <script src="./site.js" defer></script>
-</head>
-<body class="section-page research-page">
-  <a class="skip-link" href="#main">본문으로 바로가기</a>
-  <header class="site-header">
-    <a class="wordmark" href="./index.html" aria-label="dandellas 홈">dandellas<span aria-hidden="true">✳</span></a>
-    <nav class="main-nav" aria-label="주 메뉴"><a href="./index.html">home.</a><a href="./input.html">Input</a><a href="./dandelion.html" aria-current="page">dandelion</a><a href="./untitled.html">untitled</a></nav>
-  </header>
-  <main id="main" tabindex="-1">
-  <header class="section-hero page-width"><div class="section-topline"><a class="breadcrumb" href="./dandelion.html">dandelion /</a><span>02 — RESEARCH & PROJECTS</span></div><h1>dandelion<span class="title-dot">.</span></h1><div class="section-intro"><p>흩어진 관심이<br>하나의 지도가 되는 곳.</p><span>세 프로젝트를 지도와 목록으로 살펴보세요.</span></div></header>
-  <section class="research-section page-width" aria-labelledby="map-title">
-    <div class="map-toolbar"><div><h2 id="map-title">연구와 프로젝트 지도</h2><p class="map-caption">개념 지도 · 분류와 배치는 초안입니다.</p></div><div class="view-switch" role="group" aria-label="탐색 방식"><button type="button" data-view="map" aria-pressed="true" aria-controls="research-map">지도</button><button type="button" data-view="list" aria-pressed="false" aria-controls="research-list">목록</button></div></div>
-    <div class="filter-bar" role="group" aria-label="미리보기 항목 분류"><button type="button" data-filter="all" aria-pressed="true">전체</button><button type="button" data-filter="research" aria-pressed="false">연구</button><button type="button" data-filter="projects" aria-pressed="false">프로젝트</button><span>확인된 프로젝트 3개 · 임시 배치</span></div>
-    <div class="explorer-grid">
-      <div class="explorer-stage">
-        <div id="research-map" class="research-map research-map--expanded" data-filter="all" aria-label="세 프로젝트를 두 임시 분류로 배치한 개념 지도">
-          <div class="map-topnote"><span>FIELD NOTES / 003</span><span>구성 초안</span></div>
-          <svg class="map-paths expanded-paths-desktop" viewBox="0 0 1000 740" preserveAspectRatio="none" aria-hidden="true"><g data-branch="research"><path d="M500 135 C500 165 330 165 330 190"/><path d="M330 300 C330 350 170 350 170 390"/><path d="M330 300 C330 350 500 350 500 390"/></g><g data-branch="projects"><path d="M500 135 C500 165 830 165 830 190"/><path d="M830 300 L830 390"/></g></svg>
-          <svg class="map-paths expanded-paths-mobile" viewBox="0 0 1000 1160" preserveAspectRatio="none" aria-hidden="true"><g data-branch="research"><path d="M500 135 C500 160 260 150 260 170"/><path d="M260 275 C260 310 500 300 500 335"/><path d="M260 275 C260 300 45 300 45 340 L45 520 Q45 550 85 550 L500 550"/></g><g data-branch="projects"><path d="M500 135 C500 160 740 150 740 170"/><path class="expanded-project-path" d="M740 275 C740 300 955 300 955 340 L955 890 Q955 920 915 920 L500 920"/><path class="expanded-project-path-compact" d="M740 275 C740 310 500 300 500 335"/></g></svg>
-          <div class="map-root"><span class="seed-symbol" aria-hidden="true">✳</span><strong>dandelion</strong><small>연구와 만드는 일</small></div>
-          <button class="map-node category-node research-node" type="button" data-select="research" data-branch="research" aria-controls="project-detail" aria-pressed="false"><small>01 / RESEARCH</small><strong>연구</strong><span>2개 · 임시 분류</span></button>
-          <button class="map-node category-node projects-node" type="button" data-select="projects" data-branch="projects" aria-controls="project-detail" aria-pressed="false"><small>02 / PROJECTS</small><strong>프로젝트</strong><span>1개 · 임시 분류</span></button>
-          <button class="map-node project-node mechanism-node" type="button" data-select="graphrag" data-branch="research" aria-controls="project-detail" aria-pressed="false"><span class="node-dot" aria-hidden="true"></span><small>01 / 임시 배치</small><strong>mechanism aware<br>graphRAG</strong><span class="node-bottom">프로젝트 살펴보기 <b aria-hidden="true">↗</b></span></button>
-          <button class="map-node project-node lattice-node" type="button" data-select="lattice" data-branch="research" aria-controls="project-detail" aria-pressed="false"><span class="node-dot" aria-hidden="true"></span><small>02 / 임시 배치</small><strong>개인의 경험을 집합으로 구조화하고 그 관계를 활용해 생성하면, 그 사람에게 의미 있으면서도 예상 밖인 아이디어를 얻을 수 있는가?</strong><span class="node-bottom">프로젝트 살펴보기 <b aria-hidden="true">↗</b></span></button>
-          <button class="map-node project-node financial-node" type="button" data-select="financial" data-branch="projects" aria-controls="project-detail" aria-pressed="false"><span class="node-dot" aria-hidden="true"></span><small>03 / 임시 배치</small><strong>Financial GraphRAG</strong><span class="node-bottom">프로젝트 살펴보기 <b aria-hidden="true">↗</b></span></button>
-          <p class="map-bottomnote">점과 이름을 눌러 살펴보세요.</p>
-        </div>
-        <div id="research-list" class="research-list" hidden>
-          <div class="list-group" data-branch="research"><h3><span>01</span> 연구 <small>2개 · 임시 분류</small></h3><button class="project-list-item" type="button" data-select="graphrag" aria-controls="project-detail" aria-pressed="false"><span><small>01 / 프로젝트</small><strong>mechanism aware graphRAG</strong><span>프로젝트 페이지 연결</span></span><b aria-hidden="true">↗</b></button><button class="project-list-item lattice-list-item" type="button" data-select="lattice" aria-controls="project-detail" aria-pressed="false"><span><small>02 / 프로젝트</small><strong>개인의 경험을 집합으로 구조화하고 그 관계를 활용해 생성하면, 그 사람에게 의미 있으면서도 예상 밖인 아이디어를 얻을 수 있는가?</strong><span>프로젝트 페이지 연결</span></span><b aria-hidden="true">↗</b></button></div>
-          <div class="list-group" data-branch="projects"><h3><span>02</span> 프로젝트 <small>1개 · 임시 분류</small></h3><button class="project-list-item" type="button" data-select="financial" aria-controls="project-detail" aria-pressed="false"><span><small>03 / 프로젝트</small><strong>Financial GraphRAG</strong><span>프로젝트 페이지 연결</span></span><b aria-hidden="true">↗</b></button></div>
-        </div>
-      </div>
-      <aside id="project-detail" class="project-detail" aria-labelledby="detail-title" tabindex="-1">
-        <p class="eyebrow" id="detail-eyebrow">EXPLORE THE MAP</p><span class="detail-seed" aria-hidden="true">✳</span><h3 id="detail-title">세 프로젝트를<br>살펴보는 지도.</h3><p id="detail-copy">확인된 이름과 제목으로 세 프로젝트 페이지를 연결했어요. 분류와 배치는 아직 초안이에요.</p><div id="detail-extra"><p class="draft-chip">3개 프로젝트 · 임시 분류</p></div><a id="detail-link" class="text-link" href="./project-graphrag.html" hidden>프로젝트 페이지 열기 <span aria-hidden="true">↗</span></a>
-        <details class="map-explainer"><summary>어떤 지도인가요?</summary><p>실제 장소를 표시하는 지도가 아니라, 연구와 프로젝트를 주제별로 모으는 개념 지도예요. 현재의 분류와 연결선은 제안이며, 연구 간 실제 관계를 뜻하지는 않아요.</p></details>
-      </aside>
-    </div>
-    <p id="map-announcement" class="sr-only" role="status" aria-live="polite"></p>
-    <noscript><p class="noscript-note">지도의 전환 기능에는 JavaScript가 필요합니다. <a href="./project-graphrag.html">mechanism aware graphRAG</a>, <a href="./project-lattice.html">개인의 경험을 집합으로 구조화하고 그 관계를 활용해 생성하면, 그 사람에게 의미 있으면서도 예상 밖인 아이디어를 얻을 수 있는가?</a>, <a href="./project-financial.html">Financial GraphRAG</a> 페이지는 바로 열 수 있어요.</p></noscript>
-  </section>
-  <a class="next-room page-width" href="./untitled.html"><span>다음 공간 / 경험 · 취미</span><strong>untitled</strong><span aria-hidden="true">↗</span></a>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="dandelion의 연구와 프로젝트, 그리고 그 사이의 개념을 잇는 그래프 지도."><title>Research map · dandellas</title><link rel="icon" href="./assets/seed.svg"><link rel="stylesheet" href="./fonts.css"><link rel="stylesheet" href="./cinema.css"><link rel="stylesheet" href="./map.css"><script src="./map.js" defer></script></head>
+<body class="film-index map-page"><a class="skip" href="#map-index">Skip to node list</a>
+<header class="site-header"><a class="site-name" href="./dandelion.html">dandelion</a><span class="header-center">Research map</span><nav class="desktop-nav" aria-label="바로가기"><a href="./index.html">home</a><a href="./input.html">Input</a><a href="./untitled.html">untitled</a><a href="./dandelion-map.html" aria-current="page">map</a></nav><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button></header>
+<nav id="mobile-menu" aria-label="모바일 바로가기" hidden><a href="./index.html">home</a><a href="./input.html">Input</a><a href="./untitled.html">untitled</a><a href="./dandelion-map.html" aria-current="page">map</a></nav>
+<main id="map-shell">
+<div id="map-stage" class="map-stage"><canvas id="map-canvas" role="img" aria-label="dandelion의 세 프로젝트와 관련 개념을 점과 선으로 연결한 그래프. 아래 노드 목록으로도 탐색할 수 있습니다."></canvas></div><div class="screen-grain" aria-hidden="true"></div>
+<section id="map-index" class="map-index" aria-labelledby="map-index-label" tabindex="-1"><h1 id="map-index-label">GRAPH VIEW / <span id="node-count">00</span> NODES</h1><div class="map-index-list" id="map-index-list"></div></section>
+<footer class="map-footer"><span class="map-hint" id="map-hint">DRAG TO MOVE · SCROLL TO ZOOM · CLICK A NODE</span><div class="map-zoom" role="group" aria-label="지도 확대"><button type="button" data-map-zoom="-1" aria-label="축소">−</button><button type="button" data-map-zoom="0" aria-label="전체 보기">FIT</button><button type="button" data-map-zoom="1" aria-label="확대">+</button></div><span class="model-note">CONCEPT MAP · DRAFT</span></footer>
+<p id="map-announcement" class="sr-only" role="status" aria-live="polite"></p>
+<noscript><p class="map-noscript">지도를 보려면 JavaScript가 필요합니다. <a href="./project-graphrag.html">Mechanism aware GraphRAG</a> · <a href="./project-financial.html">Financial GraphRAG</a> · <a href="./project-lattice.html">개인의 경험을 집합으로 구조화하는 연구</a></p></noscript>
 </main>
-  <footer class="site-footer">
-    <a href="./index.html" class="footer-brand">dandellas.</a>
-    <span>배우고, 만들고, 살아가는 기록.</span>
-
-  </footer>
-</body>
-</html>
+<dialog id="project-dialog" aria-labelledby="info-title"><div class="dialog-top"><span id="node-kind">NODE NOTES</span><span class="dialog-lang" role="group" aria-label="Language"><button type="button" data-lang="ko" aria-pressed="true">KO</button><span aria-hidden="true">/</span><button type="button" data-lang="en" aria-pressed="false">EN</button></span><button id="info-close" type="button">Close ×</button></div><h2 id="info-title"></h2><div id="info-copy"></div><p class="visual-note" id="map-note"></p></dialog>
+</body></html>
