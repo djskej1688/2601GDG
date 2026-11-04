@@ -283,3 +283,151 @@ def sticks():
 
 
 FIGS = {f.__name__: f for f in [bohr, bondcurve, waves, bandsplit, bandtypes, packing2d, bravais2d, latlines, xspectrum, xlevels, nasoft, bragg, sticks]}
+
+
+# ---------- calculus figures ----------
+def _polar_path(fn, cx, cy, s, t0=0.0, t1=2 * math.pi, steps=320, angle=None):
+    segs, cur = [], []
+    for i in range(steps + 1):
+        t = t0 + (t1 - t0) * i / steps
+        v = fn(t)
+        if angle is not None:
+            v, t = t, angle
+        if v is None:
+            if cur: segs.append(cur); cur = []
+            continue
+        cur.append((cx + v * math.cos(t) * s, cy - v * math.sin(t) * s))
+    if cur: segs.append(cur)
+    return segs
+
+
+def _panel(x0, y0, w, label, curves, rmax, note=None, fill=None):
+    cx, cy, s = x0 + w / 2, y0 + w / 2, (w / 2 - 10) / rmax
+    b = [L(x0 + 6, cy, x0 + w - 6, cy, MU, .7, .6), L(cx, y0 + 6, cx, y0 + w - 6, MU, .7, .6)]
+    if fill:
+        for seg in _polar_path(*fill[0], cx=cx, cy=cy, s=s, **fill[1]):
+            b.append(f'<path d="M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in seg) + f'Z" fill="{OR}" fill-opacity=".28" stroke="none"/>')
+    for fn, c, kw in curves:
+        for seg in _polar_path(fn, cx, cy, s, **kw):
+            b.append(P(seg, c, 1.6))
+    b.append(T(cx, y0 + w + 14, label, YE, 11, 'middle'))
+    if note: b.append(T(cx, y0 + w + 28, note, MU, 9.5, 'middle'))
+    return b
+
+
+def _gallery(items, title, cols=4, w=140):
+    b = []
+    for k, it in enumerate(items):
+        x0, y0 = 10 + (k % cols) * (w + 22), 6 + (k // cols) * (w + 46)
+        b += _panel(x0, y0, w, *it)
+    rows = (len(items) + cols - 1) // cols
+    return svg(10 + cols * (w + 22), rows * (w + 46) + 4, b, title)
+
+
+def polarcircles():
+    cos, sin = math.cos, math.sin
+    return _gallery([('r = 2', [(lambda t: 2, YE, {})], 4.5), ('θ = π/4', [(lambda t: t, YE, dict(t0=-4, t1=4, steps=2, angle=math.pi / 4))], 4.5, '원점을 지나는 직선'),
+                     ('r = 6 sin θ', [(lambda t: 6 * sin(t), YE, dict(t1=math.pi))], 6.5, '중심 (0, 3), 반지름 3'),
+                     ('r = 4 cos θ', [(lambda t: 4 * cos(t), YE, dict(t1=math.pi))], 4.5, '중심 (2, 0), 반지름 2')], '극좌표의 원과 직선')
+
+
+
+def roses():
+    sin, cos = math.sin, math.cos
+    return _gallery([('r = sin 3θ', [(lambda t: sin(3 * t), YE, {})], 1.1, 'n = 3 홀수 → 3잎'),
+                     ('r = cos 3θ', [(lambda t: cos(3 * t), YE, {})], 1.1, 'n = 3 홀수 → 3잎'),
+                     ('r = sin 2θ', [(lambda t: sin(2 * t), YE, {})], 1.1, 'n = 2 짝수 → 4잎'),
+                     ('r = cos 2θ', [(lambda t: cos(2 * t), YE, {})], 1.1, 'n = 2 짝수 → 4잎')], '장미 곡선: n이 홀수면 n잎, 짝수면 2n잎')
+
+
+def limacons():
+    cos = math.cos
+    items = []
+    for a, name in [(.5, '안쪽 고리 (a/b < 1)'), (1, '심장형 (a/b = 1)'), (1.5, '오목 (1 < a/b < 2)'), (2, '볼록 (a/b ≥ 2)')]:
+        items.append((f'r = {a:g} + cos θ', [(lambda t, a=a: a + cos(t), YE, {})], 3.2, name))
+    return _gallery(items, 'r = a + b cos θ에서 a/b에 따라 바뀌는 리마송 모양 (b = 1)')
+
+
+def lemniscates():
+    def sq(f):
+        return lambda t: math.sqrt(f(t)) if f(t) >= 0 else None
+    def sqn(f):
+        return lambda t: -math.sqrt(f(t)) if f(t) >= 0 else None
+    c2 = lambda t: math.cos(2 * t)
+    s2 = lambda t: math.sin(2 * t)
+    c1 = lambda t: math.cos(t)
+    return _gallery([('r² = cos 2θ', [(sq(c2), YE, {}), (sqn(c2), YE, {})], 1.1, '∞ 모양, x축 방향'),
+                     ('r² = sin 2θ', [(sq(s2), YE, {}), (sqn(s2), YE, {})], 1.1, 'y = x 방향'),
+                     ('r² = cos θ', [(sq(c1), YE, {}), (sqn(c1), YE, {})], 1.1, '두 고리'),
+                     ('r = 2θ (θ ≥ 0)', [(lambda t: 2 * t, YE, dict(t1=4 * math.pi, steps=500))], 26, '나선')], '리본형(r² 꼴)과 나선. 우변이 음수인 구간에는 점이 없다')
+
+
+def polararea():
+    cos, pi = math.cos, math.pi
+    items = [
+        ('r = 2(1 + cos θ)', [(lambda t: 2 * (1 + cos(t)), YE, {})], 4.4, '전체 넓이 6π', ((lambda t: 2 * (1 + cos(t)),), {})),
+        ('r = 1 + 2cos θ', [(lambda t: 1 + 2 * cos(t), YE, {})], 3.2, '작은 고리 π − 3√3/2', ((lambda t: 1 + 2 * cos(t),), dict(t0=2 * pi / 3, t1=4 * pi / 3))),
+        ('r = 1 밖 / r = 1 − cos θ', [(lambda t: 1, YE, {}), (lambda t: 1 - cos(t), SKY, {})], 2.2, '원 안 ∩ 심장형 밖 = 2 − π/4', None),
+    ]
+    b = []
+    w = 180
+    for k, (label, curves, rmax, note, fill) in enumerate(items):
+        x0, y0 = 10 + k * (w + 30), 6
+        cx, cy, s = x0 + w / 2, y0 + w / 2, (w / 2 - 10) / rmax
+        if k == 2:
+            pts = []
+            for i in range(181):
+                t = -pi / 2 + pi * i / 180
+                pts.append((cx + cos(t) * s, cy - math.sin(t) * s))
+            for i in range(181):
+                t = pi / 2 - pi * i / 180
+                r = 1 - cos(t)
+                pts.append((cx + r * cos(t) * s, cy - r * math.sin(t) * s))
+            b.append('<path d="M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in pts) + f'Z" fill="{OR}" fill-opacity=".3"/>')
+            b += _panel(x0, y0, w, label, curves, rmax, note)
+        else:
+            b += _panel(x0, y0, w, label, curves, rmax, note, fill=(fill[0], fill[1]))
+    return svg(10 + 3 * (w + 30), w + 50, b, '극좌표 넓이 예제 세 개 (주황이 구하는 넓이)')
+
+
+def detarea():
+    b = [L(60, 200, 400, 200, MU, .8), L(80, 220, 80, 20, MU, .8)]
+    o, u, v = (80, 200), (240, 160), (130, 70)
+    q = (u[0] + v[0] - o[0], u[1] + v[1] - o[1])
+    b.append(f'<path d="M{o[0]} {o[1]}L{u[0]} {u[1]}L{q[0]} {q[1]}L{v[0]} {v[1]}Z" fill="{YE}" fill-opacity=".25" stroke="{YE}" stroke-width="1.2"/>')
+    b += [arrow(*o, *u, OR, 1.8), arrow(*o, *v, SKY, 1.8), T(u[0] + 6, u[1] + 14, '(a, b) = 1행', OR, 10), T(v[0] - 4, v[1] - 6, '(c, d) = 2행', SKY, 10, 'end'),
+          T(205, 120, '넓이 = |ad − bc|', YE, 11, 'middle'),
+          T(430, 60, '한 행을 k배 → 넓이 k배', IV, 10), T(430, 82, '두 행 교환 → 방향(부호) 반대', IV, 10), T(430, 104, '두 행이 비례 → 납작, det = 0', IV, 10), T(430, 126, '한 행에 다른 행 배수 더하기', IV, 10), T(440, 144, '→ 밑변·높이 그대로, det 불변', MU, 10)]
+    return svg(660, 230, b, '2×2 행렬식은 두 행벡터가 만드는 평행사변형의 부호 있는 넓이')
+
+
+def epsband():
+    b = [L(60, 200, 620, 200, MU, .8), L(60, 210, 60, 20, MU, .8)]
+    L0, eps = 110, 28
+    b += [L(60, L0 - eps, 620, L0 - eps, IV, 1, .6), L(60, L0 + eps, 620, L0 + eps, IV, 1, .6), L(60, L0, 620, L0, YE, 1, .8, '4 3'),
+          f'<rect x="300" y="{L0 - eps}" width="320" height="{2 * eps}" fill="{YE}" fill-opacity=".08"/>',
+          T(626, L0 + 4, 'L', YE, 11), T(626, L0 - eps + 4, 'L + ε', IV, 10), T(626, L0 + eps + 4, 'L − ε', IV, 10),
+          L(300, 30, 300, 205, OR, 1, .8, '3 3'), T(300, 220, 'N', OR, 11, 'middle')]
+    for n in range(1, 25):
+        y = L0 + 85 * (-1) ** n / (n ** 0.9) * (1 if n < 3 else .9)
+        b.append(C(60 + n * 23, y, 3.4, OR if 60 + n * 23 > 300 else IV, .95))
+    b.append(T(180, 222, 'n > N이면 모든 aₙ이 띠 안에 들어간다', MU, 10, 'middle'))
+    return svg(660, 232, b, '수열의 수렴: n이 N보다 크면 모든 항이 L ± ε 띠 안에 있다')
+
+
+def integraltest():
+    b = [L(60, 200, 620, 200, MU, .8), L(60, 210, 60, 15, MU, .8)]
+    X = lambda x: 60 + (x - .5) * 70
+    Y = lambda y: 200 - y * 150
+    f = lambda x: 1 / x ** 1.5
+    for n in range(2, 9):
+        b.append(f'<rect x="{X(n - 1):.1f}" y="{Y(f(n)):.1f}" width="70" height="{200 - Y(f(n)):.1f}" fill="{OR}" fill-opacity=".3" stroke="{OR}" stroke-opacity=".8"/>')
+        b.append(T(X(n - 1) + 35, Y(f(n)) - 4, f'a{chr(0x2080 + n)}', OR, 9, 'middle'))
+    b.append(P([(X(x), Y(f(x))) for x in [1 + i * .02 for i in range(400)]], YE, 2))
+    for n in range(1, 9):
+        b.append(T(X(n), 214, str(n), MU, 9, 'middle'))
+    b += [T(X(1.3), Y(1) + 4, 'y = f(x)', YE, 11), T(400, 70, 'a₂ + a₃ + … ≤ ∫₁^∞ f(x) dx', IV, 11, 'middle'), T(400, 90, '적분이 유한하면 부분합에 천장이 생겨 수렴', MU, 10, 'middle')]
+    return svg(660, 226, b, '적분판정법: 각 항을 폭 1인 직사각형으로 보면 곡선 아래에 들어간다')
+
+
+FIGS.update({f.__name__: f for f in [polarcircles, roses, limacons, lemniscates, polararea, detarea, epsband, integraltest]})

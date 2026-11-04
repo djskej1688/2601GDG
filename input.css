@@ -99,3 +99,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:56px;z-index:30;bac
 .xtal-legend i::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
 @media(max-width:760px){.xtal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.xtal-grid.is-single{grid-template-columns:minmax(0,1fr)}}
 .block-title,.note-chapter,.note-course{scroll-margin-top:70px}
+.mathlab{margin:18px 0 8px;max-width:440px}
+.mathlab .xtal-stage canvas{cursor:default}
+.lab-tools select{background:#04110a;color:var(--text);border:1px solid #d3dcc54d;border-radius:1px;font:10.5px/1.4 var(--font-display);padding:3px 4px}
+.lab-tools label{display:inline-flex;align-items:center;gap:8px}
+.lab-tools input[type=range]{width:150px;accent-color:#e0d67b}
+.lab-tools output{font:10.5px/1.4 var(--font-display);color:var(--yellow);min-width:52px}
+.lab-note{font-size:11.5px;line-height:1.7;margin-top:6px;color:var(--yellow);opacity:.9}

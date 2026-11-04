@@ -2,6 +2,7 @@
 import sys, os, html, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from input_mc import MC_SECTIONS
+from input_math import MATH_SECTIONS
 from input_figs import FIGS
 
 def inline(s):
@@ -173,11 +174,15 @@ SUBJECTS = [
    dict(id='materials-chem', title='재료화학개론', sub='Introduction to Solid State Chemistry · 1–5장', sections=MC_SECTIONS),
   ]),
  dict(id='german', name='Deutsch', ko='독일어', term='', status='soon', intro='정리 중이에요. 곧 올라와요.', chips=[], sections=[]),
- dict(id='calculus', name='Calculus', ko='대학수학', term='', status='soon', intro='정리 중이에요. 곧 올라와요.', chips=[], sections=[]),
+ dict(id='calculus', name='Calculus', ko='대학수학', term='2026 FALL', status='notes',
+  intro='행렬로 연립방정식을 풀고, 무한급수가 수렴하는지 판정하고, 극좌표로 곡선과 넓이를 다뤄요. 정리마다 왜 그렇게 되는지와 조건을 같이 적었어요. 1학기 내용은 정리해서 추가할 예정이에요.',
+  chips=['9장 행렬과 응용', '10장 무한급수', '11장 극좌표'], graph='./input-graph-math.html', sections=MATH_SECTIONS),
 ]
 
 def render_fig(f):
     kind, key, cap = f
+    if kind == 'lab':
+        return f'<figure class="mathlab" data-lab="{key}"><div class="xtal-stage"></div><figcaption>{inline(cap)}</figcaption></figure>'
     if kind == '3d':
         return f'<figure class="xtal" data-xtal="{key}"><div class="xtal-stage"></div><figcaption>{inline(cap)}</figcaption></figure>'
     return f'<figure class="note-fig">{FIGS[key]()}<figcaption>{inline(cap)}</figcaption></figure>'
@@ -244,7 +249,7 @@ def render_rows():
     return ''.join(rows)
 
 PAGE = '''<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="Input: 학교에서 공부한 것들을 과목별로 정리한 노트."><title>Input · dandellas</title><link rel="icon" href="./assets/seed.svg"><link rel="stylesheet" href="./fonts.css"><link rel="stylesheet" href="./input.css"><script src="./input.js" defer></script><script src="./crystal-viewer.js" defer></script></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="Input: 학교에서 공부한 것들을 과목별로 정리한 노트."><title>Input · dandellas</title><link rel="icon" href="./assets/seed.svg"><link rel="stylesheet" href="./fonts.css"><link rel="stylesheet" href="./input.css"><script src="./input.js" defer></script><script src="./crystal-viewer.js" defer></script><script src="./math-labs.js" defer></script></head>
 <body class="input-page"><a class="skip" href="#notes">Skip to notes</a>
 <header class="site-header"><a class="site-name" href="./input.html">Input</a><span class="header-center">Study notes</span><nav class="desktop-nav" aria-label="바로가기"><a href="./index.html">home</a><a href="./dandelion.html">dandelion</a><a href="./untitled.html">untitled</a></nav><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button></header>
 <nav id="mobile-menu" aria-label="모바일 바로가기" hidden><a href="./index.html">home</a><a href="./dandelion.html">dandelion</a><a href="./untitled.html">untitled</a></nav>
