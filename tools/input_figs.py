@@ -431,3 +431,66 @@ def integraltest():
 
 
 FIGS.update({f.__name__: f for f in [polarcircles, roses, limacons, lemniscates, polararea, detarea, epsband, integraltest]})
+
+
+# ---------- general chemistry (1st semester) ----------
+def ietrend():
+    data = [('Li', 520), ('Be', 899), ('B', 801), ('C', 1086), ('N', 1402), ('O', 1314), ('F', 1681), ('Ne', 2081)]
+    X = lambda i: 80 + i * 72
+    Y = lambda v: 200 - v / 2200 * 175
+    b = [L(60, 200, 620, 200, MU, .8), L(60, 205, 60, 15, MU, .8), T(56, 16, 'IE₁ (kJ/mol)', MU, 10, 'start')]
+    b.append(P([(X(i), Y(v)) for i, (_, v) in enumerate(data)], YE, 1.8))
+    for i, (el, v) in enumerate(data):
+        dip = el in ('B', 'O')
+        b += [C(X(i), Y(v), 4.5, OR if dip else YE), T(X(i), 216, el, IV, 11, 'middle'), T(X(i), Y(v) - 10, str(v), OR if dip else MU, 9.5, 'middle')]
+    b += [T(X(2), Y(801) + 24, '2p 전자 하나 → 떼기 쉬움', OR, 9.5, 'middle'), T(X(5), Y(1314) + 24, '2p⁴ 짝지은 전자 반발', OR, 9.5, 'middle')]
+    return svg(660, 228, b, '2주기 원소의 제1이온화 에너지. B와 O에서 경향이 꺾인다')
+
+
+def borncycle():
+    # energy levels (kJ/mol) relative to Na(s) + 1/2 Cl2(g) = 0
+    steps = [('Na(s) + ½Cl₂(g)', 0), ('Na(g) + ½Cl₂(g)', 108), ('Na⁺(g) + e⁻ + ½Cl₂(g)', 604), ('Na⁺(g) + e⁻ + Cl(g)', 726), ('Na⁺(g) + Cl⁻(g)', 377), ('NaCl(s)', -411)]
+    Y = lambda e: 190 - e * .2
+    b = []
+    xs = [40, 130, 220, 310, 400, 490]
+    for i, (name, e) in enumerate(steps):
+        b += [L(xs[i], Y(e), xs[i] + 80, Y(e), IV if i not in (0, 5) else YE, 2), T(xs[i] + 40, Y(e) - 6, name, IV, 8.5, 'middle')]
+    labels = ['승화 +108', '이온화 +496', '½ 해리 +122', '전자 친화도 −349', '격자 에너지 U']
+    for i in range(5):
+        y1, y2 = Y(steps[i][1]), Y(steps[i + 1][1])
+        c = OR if steps[i + 1][1] > steps[i][1] else SKY
+        b.append(arrow(xs[i] + 80, y1, xs[i + 1] + 4, y2, c, 1.3))
+        b.append(T((xs[i] + 80 + xs[i + 1]) / 2 + 8, (y1 + y2) / 2, labels[i], c, 9))
+    b += [L(30, Y(0), 30, Y(-411), YE, 1.2, .8, '3 3'), T(36, Y(-200), 'ΔH°f = −411', YE, 10),
+          T(560, 40, 'U = −411 − (108 + 496 + 122 − 349)', MU, 10, 'middle'), T(560, 56, '= −788 kJ/mol', YE, 10, 'middle')]
+    return svg(660, 290, b, 'NaCl의 Born–Haber 순환: 각 단계 엔탈피의 합이 생성 엔탈피와 같다')
+
+
+def _mo_column(x0, title, order, electrons):
+    # order: list of (label, count) bottom to top; electrons: list per orbital of ('ud'|'u'|'')
+    b = [T(x0 + 90, 18, title, YE, 11, 'middle')]
+    y, i = 250, 0
+    for label, n in order:
+        w = 34 if n == 1 else 30
+        xs = [x0 + 90 - w / 2] if n == 1 else [x0 + 52, x0 + 96]
+        for k in range(n):
+            occ = electrons[i]; i += 1
+            star = '*' in label
+            b.append(L(xs[k], y, xs[k] + w, y, OR if star else YE, 2))
+            arrows = {'ud': '↑↓', 'u': '↑', '': ''}[occ]
+            b.append(T(xs[k] + w / 2, y - 4, arrows, IV, 12, 'middle'))
+        b.append(T(x0 + 150, y + 4, label, OR if '*' in label else MU, 10))
+        y -= 30
+    return b
+
+
+def modiagram():
+    n2 = [('σ2s', 1), ('σ*2s', 1), ('π2p', 2), ('σ2p', 1), ('π*2p', 2), ('σ*2p', 1)]
+    o2 = [('σ2s', 1), ('σ*2s', 1), ('σ2p', 1), ('π2p', 2), ('π*2p', 2), ('σ*2p', 1)]
+    b = _mo_column(20, 'N₂ (B₂, C₂, N₂의 순서)', n2, ['ud', 'ud', 'ud', 'ud', 'ud', '', '', ''])
+    b += _mo_column(330, 'O₂ (O₂, F₂의 순서)', o2, ['ud', 'ud', 'ud', 'ud', 'ud', 'u', 'u', ''])
+    b += [T(110, 272, '결합 8, 반결합 2 → 결합차수 3, 반자기성', MU, 10, 'middle'), T(420, 272, '결합 8, 반결합 4 → 결합차수 2, 홀전자 2 → 상자기성', MU, 10, 'middle')]
+    return svg(660, 282, b, '2주기 동핵 이원자 분자의 원자가 MO 준위: N₂까지는 π2p가 σ2p보다 낮고 O₂부터 뒤바뀐다')
+
+
+FIGS.update({f.__name__: f for f in [ietrend, borncycle, modiagram]})

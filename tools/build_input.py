@@ -3,6 +3,7 @@ import sys, os, html, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from input_mc import MC_SECTIONS
 from input_math import MATH_SECTIONS
+from input_gc1 import GC1_SECTIONS
 from input_figs import FIGS
 
 def inline(s):
@@ -98,9 +99,9 @@ SUBJECTS = [
   ]),
  dict(id='chemistry', name='Chemistry', ko='화학', term='2026 FALL', status='notes',
   intro='대학화학, 재료물성개론, 재료화학개론을 한곳에 모았어요. 과목을 넘나드는 개념은 지식 그래프에서 서로 이어 볼 수 있어요.',
-  chips=['대학화학2 10–14장', '재료물성개론 1–6주차', '재료화학개론'], graph='./input-graph.html',
+  chips=['대학화학 6–14장', '재료물성개론 1–6주차', '재료화학개론'], graph='./input-graph.html',
   groups=[
-   dict(id='gen-chem', title='대학화학2', sub='일반화학 10–14장', sections=[
+   dict(id='gen-chem', title='대학화학', sub='일반화학 6–14장 · 1학기 6–9장, 2학기 10–14장', sections=GC1_SECTIONS + [
     dict(id='gc-10', title='10장 · 액체와 고체', items=[
       '분자간 힘은 분산력 < 쌍극자–쌍극자 < 수소결합 순이에요. 단, 분자량이 비슷할 때의 비교예요. 수소결합은 H가 N, O, F에 직접 붙어 있을 때만 생겨요.',
       '분자간 힘이 클수록 끓는점·표면장력·점성은 커지고 증기압은 작아져요. 끓는점은 증기압이 외부 압력과 같아지는 온도예요.',

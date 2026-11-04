@@ -67,7 +67,8 @@
     Cd: { color: 'ivory', r: .1, label: 'C (Si, Ge)' },
     Ap: { color: 'ivory', r: .15, label: 'A (Ca, Sr…)' }, Bp: { color: 'orange', r: .09, label: 'B (Ti…)' }, Xp: { color: 'rose', r: .11, label: 'X (O)' },
     Cm: { color: 'amber', r: .26, label: 'C' }, H: { color: 'ivory', r: .16, label: 'H' }, Bm: { color: 'amber', r: .24, label: 'B' }, Fm: { color: 'yellow', r: .2, label: 'F' }, Be: { color: 'amber', r: .22, label: 'Be' },
-    pt: { color: 'muted', r: .05 }
+    pt: { color: 'muted', r: .05 },
+    vA: { color: 'amber', r: .2, label: 'A 중심 원자' }, vB: { color: 'ivory', r: .15, label: 'B 결합 원자' }, vE: { color: 'sky', r: .2, label: 'E 비공유 전자쌍', lp: true }
   };
 
   function molecule(center, kind, dirs, len) {
@@ -75,6 +76,23 @@
     return { atoms, bonds: dirs.map((_, i) => [0, i + 1]), noBox: true, spin: true };
   }
 
+  // VSEPR: electron domains around a central atom; lone pairs (E) drawn as translucent lobes.
+  const DOM = {
+    2: [[1, 0, 0], [-1, 0, 0]],
+    3: [[1, 0, 0], [-.5, Math.sqrt(3) / 2, 0], [-.5, -Math.sqrt(3) / 2, 0]],
+    4: [[0, 0, 1], [.943, 0, -.333], [-.471, .816, -.333], [-.471, -.816, -.333]],
+    5: [[1, 0, 0], [-.5, Math.sqrt(3) / 2, 0], [-.5, -Math.sqrt(3) / 2, 0], [0, 0, 1], [0, 0, -1]],
+    6: [[0, 0, 1], [0, 0, -1], [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0]]
+  };
+  function vsepr(domains, lpSlots) {
+    const atoms = [[0, 0, 0, 'vA']], bonds = [];
+    DOM[domains].forEach((d, i) => {
+      const lp = lpSlots.includes(i), k = lp ? .5 : .95;
+      atoms.push([d[0] * k, d[1] * k, d[2] * k, lp ? 'vE' : 'vB']);
+      if (!lp) bonds.push([0, atoms.length - 1]);
+    });
+    return { atoms, bonds, noBox: true, view: [.5, -.35] };
+  }
   const STRUCTS = {
     sc: () => ({ atoms: at(corners, 'lat'), packR: .5, contact: [[0, 0, 0], [1, 0, 0], 'a = 2r'] }),
     bcc: () => ({ atoms: [...at(corners, 'lat'), ...at(body, 'ctr')], packR: Math.sqrt(3) / 4, contact: [[0, 0, 0], [1, 1, 1], '√3·a = 4r'] }),
@@ -95,6 +113,10 @@
       return { atoms, bonds: bondsBy(atoms, Math.sqrt(3) / 4) };
     },
     perovskite: () => { const atoms = [...at(corners, 'Ap'), ...at(body, 'Bp'), ...at(faces, 'Xp')]; return { atoms, bonds: faces.map((_, i) => [8, 9 + i]) }; },
+    'v-ab2': () => vsepr(2, []), 'v-ab3': () => vsepr(3, []), 'v-ab2e': () => vsepr(3, [0]),
+    'v-ab4': () => vsepr(4, []), 'v-ab3e': () => vsepr(4, [0]), 'v-ab2e2': () => vsepr(4, [0, 1]),
+    'v-ab5': () => vsepr(5, []), 'v-ab4e': () => vsepr(5, [0]), 'v-ab3e2': () => vsepr(5, [1, 2]), 'v-ab2e3': () => vsepr(5, [0, 1, 2]),
+    'v-ab6': () => vsepr(6, []), 'v-ab5e': () => vsepr(6, [1]), 'v-ab4e2': () => vsepr(6, [0, 1]),
     ch4: () => molecule('Cm', 'H', [[1, 1, 1], [1, -1, -1], [-1, 1, -1], [-1, -1, 1]], .75),
     bf3: () => { const m = molecule('Bm', 'Fm', [[1, 0, 0], [-.5, Math.sqrt(3) / 2, 0], [-.5, -Math.sqrt(3) / 2, 0]], .8); m.view = [0, -.9]; return m; },
     beh2: () => molecule('Be', 'H', [[1, 0, 0], [-1, 0, 0]], .8),
@@ -152,7 +174,7 @@
       b.addEventListener('click', () => { packed = !packed; b.textContent = packed ? '원자 크기: 맞닿게' : '원자 크기: 점'; b.setAttribute('aria-pressed', String(packed)); draw(); });
       tools.append(b);
     }
-    const legendKinds = [...new Set(s.atoms.map(a => a[3]))].filter(k => KINDS[k]?.label);
+    const legendKinds = [...new Set(s.atoms.map(a => a[3]))].filter(k => KINDS[k]?.label).sort((a, b) => Object.keys(KINDS).indexOf(a) - Object.keys(KINDS).indexOf(b));
     if (legendKinds.length) {
       const lg = document.createElement('span'); lg.className = 'xtal-legend';
       legendKinds.forEach(k => { const i = document.createElement('i'); i.style.setProperty('--c', rgba(KINDS[k].color, 1)); i.textContent = KINDS[k].label; lg.append(i); });
@@ -205,6 +227,7 @@
       s.atoms.forEach(a => items.push({ d: project(a)[2], f: () => {
         const [x, y, , k] = project(a), kind = KINDS[a[3]] || KINDS.lat;
         const r = Math.max(2, (packed && s.packR ? s.packR : kind.r) * k);
+        if (kind.lp) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = rgba(kind.color, .22); ctx.fill(); ctx.setLineDash([3, 3]); ctx.strokeStyle = rgba(kind.color, .8); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]); return; }
         const g = ctx.createRadialGradient(x - r * .35, y - r * .35, r * .1, x, y, r);
         g.addColorStop(0, rgba(kind.color, packed ? .75 : 1)); g.addColorStop(.7, rgba(kind.color, packed ? .5 : .85)); g.addColorStop(1, rgba('muted', packed ? .35 : .7));
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
