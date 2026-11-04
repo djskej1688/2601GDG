@@ -12,7 +12,7 @@
   const coarse = matchMedia('(pointer: coarse)');
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const smooth = (a, b, t) => { const q = clamp((t - a) / (b - a), 0, 1); return q * q * (3 - 2 * q); };
-  const INK = { ivory: [221, 225, 199], yellow: [224, 214, 123], muted: [120, 146, 120], amber: [181, 146, 85], text: [232, 234, 219] };
+  const INK = { ivory: [221, 225, 199], yellow: [224, 214, 123], muted: [120, 146, 120], amber: [181, 146, 85], orange: [247, 146, 52], text: [232, 234, 219] };
   const rgba = (c, a) => `rgba(${INK[c].join(',')},${clamp(a, 0, 1)})`;
 
   /* ---------- content ---------- */
@@ -184,9 +184,18 @@
       const dim = fs && !fs.has(n), on = n === f;
       const ink = n.kind === 'root' ? 'amber' : n.kind === 'project' ? 'yellow' : 'ivory';
       const a = dim ? .18 : 1;
-      if (n.kind !== 'concept' || on) { ctx.beginPath(); ctx.arc(x, y, r * 3.2, 0, Math.PI * 2); ctx.fillStyle = rgba(ink, (on ? .14 : .06) * a); ctx.fill(); }
-      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = rgba(ink, (n.kind === 'concept' ? .82 : 1) * a); ctx.fill();
-      if (on) { ctx.beginPath(); ctx.arc(x, y, r + 3.5, 0, Math.PI * 2); ctx.strokeStyle = rgba('yellow', .9); ctx.lineWidth = 1; ctx.stroke(); }
+      if (n.kind === 'root') {
+        // Seed of the map: bright orange core, ivory rim and a soft glow.
+        const halo = ctx.createRadialGradient(x, y, r * .6, x, y, r * 4.6);
+        halo.addColorStop(0, rgba('orange', .42 * a)); halo.addColorStop(.45, rgba('orange', .12 * a)); halo.addColorStop(1, rgba('orange', 0));
+        ctx.beginPath(); ctx.arc(x, y, r * 4.6, 0, Math.PI * 2); ctx.fillStyle = halo; ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = rgba('orange', a); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, r + .8, 0, Math.PI * 2); ctx.strokeStyle = rgba('ivory', .95 * a); ctx.lineWidth = 1.6; ctx.stroke();
+      } else {
+        if (n.kind !== 'concept' || on) { ctx.beginPath(); ctx.arc(x, y, r * 3.2, 0, Math.PI * 2); ctx.fillStyle = rgba(ink, (on ? .14 : .06) * a); ctx.fill(); }
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = rgba(ink, (n.kind === 'concept' ? .82 : 1) * a); ctx.fill();
+      }
+      if (on) { ctx.beginPath(); ctx.arc(x, y, r + (n.kind === 'root' ? 5 : 3.5), 0, Math.PI * 2); ctx.strokeStyle = rgba('yellow', .9); ctx.lineWidth = 1; ctx.stroke(); }
     }
     // labels
     ctx.textAlign = 'center'; ctx.textBaseline = 'top';
