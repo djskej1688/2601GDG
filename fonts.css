@@ -1,0 +1,55 @@
+/*
+ * Original website fonts, byte-identical to the user's local font collection.
+ * Saira.ttf: Saira Stencil, wght 100..900, wdth 50..125.
+ * Noto.ttf: Noto Serif KR, wght 200..900.
+ * Both fonts use SIL Open Font License 1.1; notices accompany the fonts in
+ * assets/licenses/Saira-OFL.txt and assets/licenses/NotoSerifKR-OFL.txt.
+ *
+ * Load this once before page styles. Remove duplicate @font-face declarations
+ * from those styles to keep weight/stretch matching unambiguous.
+ * The original short aliases are preserved, with canonical-family aliases too.
+ * No page layout, global font size, font weight, or font synthesis is changed.
+ */
+
+@font-face {
+  font-family: 'SairaStencil';
+  src: url('./assets/Saira.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 50% 125%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Saira Stencil';
+  src: url('./assets/Saira.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 50% 125%;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'NotoSerifKR';
+  src: url('./assets/Noto.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Serif KR';
+  src: url('./assets/Noto.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+:root {
+  --font-display: 'SairaStencil', sans-serif;
+  --font-text: 'NotoSerifKR', serif;
+  --font-serif: var(--font-text);
+  --font-ui: var(--font-text);
+  --font-original-heading-weight: 700;
+  --font-original-width: 100%;
+}

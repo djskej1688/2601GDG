@@ -2,22 +2,20 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>welcome.</title>
-  <link rel="stylesheet" href="style.css">
+  <title>dandellas</title>
+  <link rel="icon" href="./assets/seed.svg">
+  <link rel="stylesheet" href="./fonts.css">
+  <link rel="stylesheet" href="home-original.css">
 </head>
 
-<body>
+<body class="hello-intro">
 
-  <section class="welcome">
-    <h1 onclick="goAbout()">welcome.</h1>
-  </section>
-
-  <section class="about" id="about">
+<section class="about" id="about">
 
     <div class="video-screen">
       <video
         id="introVideo"
-        src="video1.mp4"
+        src="./비디오 프로젝트 2.mp4"
         muted
         playsinline
         loop
@@ -28,183 +26,24 @@
     <div class="slider">
 
       <div class="panel intro">
-        <div class="detail-menu">
+        <div class="detail-menu" id="home-menu" inert>
           <a href="./input.html">Input</a>
           <a href="./dandelion.html">dandelion</a>
           <a href="./untitled.html">untitled</a>
         </div>
 
-        <h2>about.</h2>
+        <h2 id="about-toggle" role="button" tabindex="-1" aria-hidden="true" aria-expanded="false" aria-controls="home-menu"><span class="about-word">about.</span><svg id="letter-morph" class="letter-morph" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"></svg></h2>
       </div>
 
-      <div class="panel content">
-
-        <div class="top-info">
-          <p class="school">Hongik Univ.</p>
-          <p class="dept">Department of Liberal Studies</p>
-        </div>
-
-        <div class="main-info">
-          <p class="desc">
-            미래에 직접 만든 툴로 제약분야에서 종사하고 싶습니다.
-          </p>
-
-          <p class="lang">
-            I use <a href="./python.html">Python</a>.
-          </p>
-        </div>
-
-      </div>
 
     </div>
 
+    <button type="button" id="video-play" class="playback-fallback" aria-controls="introVideo" hidden>영상 재생</button>
+    <p id="video-status" class="video-status" role="status" aria-live="polite"></p>
   </section>
 
-  <script>
-    const about = document.querySelector('.about');
-    const intro = document.querySelector('.intro');
-    const video = document.querySelector('#introVideo');
+  <script src="./home-video.js" defer></script>
 
-    let isOpen = false;
-    let warmupTimer = null;
-    let sequenceTimers = [];
-    const videoStartTime = 0;
-    const scrollDuration = 1050;
-    const videoFadeDuration = 1100;
-
-    function clearSequenceTimers() {
-      sequenceTimers.forEach(timer => clearTimeout(timer));
-      sequenceTimers = [];
-
-      if (warmupTimer !== null) {
-        clearTimeout(warmupTimer);
-        warmupTimer = null;
-      }
-    }
-
-    function resetAboutState() {
-      about.classList.remove('video-on');
-      about.classList.remove('text-visible');
-      about.classList.remove('open');
-      intro.classList.remove('open');
-
-      isOpen = false;
-    }
-
-    function openAbout() {
-      about.classList.add('open');
-      intro.classList.add('open');
-      isOpen = true;
-    }
-
-    function closeAbout() {
-      about.classList.remove('open');
-      intro.classList.remove('open');
-      isOpen = false;
-    }
-
-    function waitForVideoEvent(eventName, fallbackTime = 700) {
-      return Promise.race([
-        new Promise(resolve => {
-          video.addEventListener(eventName, resolve, { once: true });
-        }),
-        new Promise(resolve => {
-          setTimeout(resolve, fallbackTime);
-        })
-      ]);
-    }
-
-    async function resetVideoToBeginning() {
-      if (video.readyState < 1) {
-        video.load();
-        await waitForVideoEvent('loadedmetadata');
-      }
-
-      video.pause();
-      video.currentTime = videoStartTime;
-      await waitForVideoEvent('seeked');
-    }
-
-    async function playVideoFromBeginning() {
-      try {
-        video.currentTime = videoStartTime;
-        await waitForVideoEvent('seeked', 250);
-
-        await video.play();
-      } catch (error) {
-        console.log('video play failed:', error);
-      }
-    }
-
-    function startVideoSequence() {
-      if (warmupTimer !== null) {
-        clearTimeout(warmupTimer);
-        warmupTimer = null;
-      }
-
-      about.classList.add('video-on');
-
-      sequenceTimers.push(
-        setTimeout(() => {
-          playVideoFromBeginning();
-        }, Math.max(scrollDuration, videoFadeDuration + 150))
-      );
-
-      sequenceTimers.push(
-        setTimeout(() => {
-          about.classList.add('text-visible');
-        }, scrollDuration + 1200)
-      );
-
-      sequenceTimers.push(
-        setTimeout(() => {
-          openAbout();
-        }, scrollDuration + 3200)
-      );
-    }
-
-    function goAbout() {
-      clearSequenceTimers();
-      resetAboutState();
-
-      about.scrollIntoView({
-        behavior: 'smooth'
-      });
-
-      resetVideoToBeginning().catch(error => {
-        console.log('video seek failed:', error);
-      });
-      startVideoSequence();
-    }
-
-    intro.addEventListener('click', () => {
-      if (!about.classList.contains('text-visible')) return;
-
-      if (isOpen) {
-        closeAbout();
-      } else {
-        openAbout();
-      }
-    });
-
-    window.addEventListener('load', () => {
-      video.load();
-
-      video.play()
-        .then(() => {
-          warmupTimer = setTimeout(() => {
-            video.pause();
-            video.currentTime = videoStartTime;
-          }, 1200);
-        })
-        .catch(error => {
-          console.log('video warmup failed:', error);
-          resetVideoToBeginning().catch(seekError => {
-            console.log('video seek failed:', seekError);
-          });
-        });
-    });
-  </script>
 
 </body>
 </html>
