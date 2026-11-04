@@ -43,6 +43,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:56px;z-index:30;bac
 .note-intro{font-size:13.5px;margin-bottom:18px;max-width:58ch}
 .note-chips{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:6px;margin-bottom:34px}
 .note-chips li{font:10px/1.4 var(--font-display);letter-spacing:.02em;border:1px solid #d3dcc54d;border-radius:1px;padding:4px 7px}
+.note-graph{display:inline-block;font:11px/1.4 var(--font-display);letter-spacing:.04em;border-bottom:1px solid currentColor;margin:-14px 0 34px}.note-graph:hover{text-decoration:none;color:var(--yellow)}
 .note-chapter{padding-top:26px;margin-top:26px;border-top:1px solid var(--line)}
 .note-chapter h3,.note-chapter h4{font:400 12px/1.5 var(--font-display);letter-spacing:.03em;color:var(--yellow);margin-bottom:12px}
 .note-chapter ul{padding-left:1.1em}
