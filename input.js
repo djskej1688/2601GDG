@@ -7,10 +7,12 @@
   document.documentElement.classList.add('js-ready');
   const first = notes.find(n => !n.querySelector('.note-soon') || n.querySelector('.note-chapter')) || notes[0];
   function show(id, focus) {
-    const target = notes.find(n => n.id === id) || first;
+    const inner = id && !notes.some(n => n.id === id) ? document.getElementById(id) : null;
+    const target = notes.find(n => n.id === id) || inner?.closest('.note') || first;
     notes.forEach(n => { n.hidden = n !== target; });
     rows.forEach(r => { if (r.dataset.subject === target.id) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current'); });
     document.title = `${target.querySelector('h2').textContent} · Input · dandellas`;
+    if (inner && target.contains(inner)) { requestAnimationFrame(() => inner.scrollIntoView({ block: 'start' })); return; }
     if (focus) {
       const main = document.querySelector('#notes');
       main.focus({ preventScroll: true });

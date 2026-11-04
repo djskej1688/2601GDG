@@ -70,3 +70,32 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:56px;z-index:30;bac
   .note h2{font-size:22px}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+/* Detailed notes: subheadings, tables, figures, 3D viewers */
+.block-title{font:400 15px/1.5 var(--font-text);color:var(--text);margin:30px 0 10px}
+.note-chapter>h3+.block-title,.note-chapter>h4+.block-title{margin-top:6px}
+.block-p{margin-bottom:12px}
+.ov{text-decoration:overline}
+.course-jump{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 30px;font:11px/1.4 var(--font-display);letter-spacing:.03em}
+.course-jump a{border-bottom:1px solid #d3dcc566}
+.course-jump a:hover{text-decoration:none;color:var(--yellow);border-color:currentColor}
+.note-table{overflow-x:auto;margin:14px 0 6px}
+.note-table table{border-collapse:collapse;width:100%;font-size:12px;line-height:1.6}
+.note-table th,.note-table td{border-bottom:1px solid var(--line);padding:7px 10px 7px 0;text-align:left;vertical-align:top}
+.note-table thead th{font:10px/1.5 var(--font-display);letter-spacing:.04em;color:var(--yellow);font-weight:400}
+.note-table tbody th{font-weight:400;opacity:.8;white-space:nowrap}
+.note-fig{margin:18px 0 8px}
+.note-fig figcaption,.xtal figcaption{font-size:11px;line-height:1.7;opacity:.7;margin-top:8px}
+.xtal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin:18px 0 8px}
+.xtal-grid.is-single{grid-template-columns:minmax(0,320px)}
+.xtal{margin:0;min-width:0}
+.xtal-stage{position:relative;aspect-ratio:1/1;border:1px solid var(--line);border-radius:2px;background:radial-gradient(circle at 50% 45%,#0b2015 0%,#04110a 75%)}
+.xtal-stage canvas{position:absolute;inset:0;width:100%;height:100%;cursor:grab;touch-action:pan-y}
+.xtal-stage canvas.is-dragging{cursor:grabbing;touch-action:none}
+.xtal-tools{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;margin-top:6px;font:9.5px/1.5 var(--font-display);letter-spacing:.03em;opacity:.75}
+.xtal-tools button{border:1px solid #d3dcc54d;border-radius:1px;padding:2px 6px;font:inherit}
+.xtal-tools button[aria-pressed="true"]{border-color:var(--yellow);color:var(--yellow)}
+.xtal-legend{display:flex;flex-wrap:wrap;gap:2px 10px}
+.xtal-legend i{font-style:normal;display:inline-flex;align-items:center;gap:4px}
+.xtal-legend i::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+@media(max-width:760px){.xtal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.xtal-grid.is-single{grid-template-columns:minmax(0,1fr)}}
+.block-title,.note-chapter,.note-course{scroll-margin-top:70px}
