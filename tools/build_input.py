@@ -4,6 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from input_mc import MC_SECTIONS
 from input_math import MATH_SECTIONS
 from input_gc1 import GC1_SECTIONS
+from input_math1 import MATH1_SECTIONS
 from input_figs import FIGS
 
 def inline(s):
@@ -175,9 +176,13 @@ SUBJECTS = [
    dict(id='materials-chem', title='재료화학개론', sub='Introduction to Solid State Chemistry · 1–5장', sections=MC_SECTIONS),
   ]),
  dict(id='german', name='Deutsch', ko='독일어', term='', status='soon', intro='정리 중이에요. 곧 올라와요.', chips=[], sections=[]),
- dict(id='calculus', name='Calculus', ko='대학수학', term='2026 FALL', status='notes',
-  intro='행렬로 연립방정식을 풀고, 무한급수가 수렴하는지 판정하고, 극좌표로 곡선과 넓이를 다뤄요. 정리마다 왜 그렇게 되는지와 조건을 같이 적었어요. 1학기 내용은 정리해서 추가할 예정이에요.',
-  chips=['9장 행렬과 응용', '10장 무한급수', '11장 극좌표'], graph='./input-graph-math.html', sections=MATH_SECTIONS),
+ dict(id='calculus', name='Calculus', ko='대학수학', term='2026', status='notes',
+  intro='1학기에는 지수·로그·역삼각·쌍곡선 함수를 미적분하고, 여러 적분기법과 그 응용을 배웠어요. 2학기에는 행렬로 연립방정식을 풀고, 무한급수가 수렴하는지 판정하고, 극좌표로 곡선과 넓이를 다뤄요. 정리마다 왜 그렇게 되는지와 조건을 같이 적었어요.',
+  chips=['1학기 5–7장', '초월함수 · 적분기법 · 적분의 응용', '2학기 9–11장', '행렬 · 무한급수 · 극좌표'], graph='./input-graph-math.html',
+  groups=[
+   dict(id='calc-1', title='1학기', sub='5장 초월함수 · 6장 적분기법 · 7장 적분의 응용', sections=MATH1_SECTIONS),
+   dict(id='calc-2', title='2학기', sub='9장 행렬과 응용 · 10장 무한급수 · 11장 극좌표', sections=MATH_SECTIONS),
+  ]),
 ]
 
 def render_fig(f):

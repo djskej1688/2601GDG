@@ -494,3 +494,165 @@ def modiagram():
 
 
 FIGS.update({f.__name__: f for f in [ietrend, borncycle, modiagram]})
+
+
+# --- 대학수학 1학기 (5–7장) ---
+
+def _plot(fn, x0, x1, X, Y, ylo=-1e9, yhi=1e9, steps=300):
+    segs, cur = [], []
+    for i in range(steps + 1):
+        x = x0 + (x1 - x0) * i / steps
+        try:
+            y = fn(x)
+        except (ValueError, ZeroDivisionError, OverflowError):
+            y = None
+        if y is None or not (ylo <= y <= yhi):
+            if cur: segs.append(cur); cur = []
+            continue
+        cur.append((X(x), Y(y)))
+    if cur: segs.append(cur)
+    return segs
+
+
+def _axes(cx, cy, x0, x1, y0, y1, X, Y):
+    return [L(X(x0), Y(0), X(x1), Y(0), MU, .8), L(X(0), Y(y0), X(0), Y(y1), MU, .8)]
+
+
+def invmirror():
+    s = 42
+    X = lambda x: 200 + x * s
+    Y = lambda y: 120 - y * s
+    b = _axes(0, 0, -3.5, 4.5, -2.6, 2.6, X, Y)
+    b.append(P([(X(-2.6), Y(-2.6)), (X(2.6), Y(2.6))], MU, 1, .8, dash='4 4'))
+    b += [P(sg, YE, 2) for sg in _plot(math.exp, -3.5, .95, X, Y, -3, 2.6)]
+    b += [P(sg, OR, 2) for sg in _plot(lambda x: math.log(x) if x > 0 else None, .07, 4.5, X, Y, -2.6, 3)]
+    a = .6
+    pa, pb = (X(a), Y(math.exp(a))), (X(math.exp(a)), Y(a))
+    b += [C(*pa, 4, YE), C(*pb, 4, OR), P([pa, pb], IV, 1, .5, dash='2 3'),
+          T(pa[0] - 8, pa[1] - 6, '(a, b)', YE, 10, 'end'), T(pb[0] + 6, pb[1] + 14, '(b, a)', OR, 10),
+          T(X(-3.3), Y(.35), 'y = eˣ', YE, 11), T(X(3), Y(1.45), 'y = ln x', OR, 11), T(X(2.1), Y(2.55), 'y = x', MU, 10),
+          T(420, 70, '역함수 그래프 = y = x에 대한 대칭', IV, 11), T(420, 95, '(a, b)가 f 위에 있으면 (b, a)는 f⁻¹ 위에', MU, 10),
+          T(420, 120, '접선의 기울기도 뒤집혀요', MU, 10), T(420, 145, "(f⁻¹)′(b) = 1 / f′(a)", YE, 12), T(420, 175, '예: (ln x)′ = 1 / eʸ = 1/x', OR, 10)]
+    return svg(660, 240, b, '지수함수와 로그함수는 y = x에 대해 대칭이고, 대응점의 접선 기울기는 서로 역수')
+
+
+def growth():
+    b = [arrow(40, 120, 630, 120, MU, 1.2)]
+    items = [('ln x', '로그', IV), ('√x', '거듭제곱 xᵖ', IV), ('x¹⁰⁰', '(p > 0)', IV), ('1.01ˣ', '지수 aˣ', YE), ('3ˣ', '(a > 1)', YE), ('x!', '팩토리얼', OR), ('xˣ', '', OR)]
+    for i, (f, lab, c) in enumerate(items):
+        x = 70 + i * 86
+        b += [C(x, 120, 5, c), T(x, 100, f, c, 13, 'middle'), T(x, 146, lab, MU, 10, 'middle')]
+        if i < len(items) - 1:
+            b.append(T(x + 43, 125, '≪', MU, 12, 'middle'))
+    b += [T(335, 40, 'x → ∞일 때 오른쪽으로 갈수록 더 빨리 커진다', IV, 11, 'middle'),
+          T(335, 190, 'f ≪ g  ⟺  f/g → 0  ⟺  f = o(g)', YE, 11, 'middle'), T(335, 212, '같은 무리 안에서는 지수가 큰 쪽이 빠르다: 2ˣ = o(3ˣ), log 밑만 다르면 같은 속도', MU, 10, 'middle')]
+    return svg(670, 228, b, '증가 속도의 서열: 로그 ≪ 거듭제곱 ≪ 지수 ≪ 팩토리얼')
+
+
+def arctrig():
+    b = []
+    panels = [('y = sin⁻¹x', math.asin, -1, 1, '[−1, 1] → [−π/2, π/2]', (-math.pi / 2, math.pi / 2)),
+              ('y = cos⁻¹x', math.acos, -1, 1, '[−1, 1] → [0, π]', (0, math.pi)),
+              ('y = tan⁻¹x', math.atan, -4, 4, 'ℝ → (−π/2, π/2)', (-math.pi / 2, math.pi / 2))]
+    for k, (lab, fn, x0, x1, rng, (lo, hi)) in enumerate(panels):
+        ox = 25 + k * 215
+        sx = 70 if x1 == 1 else 22
+        X = lambda x, ox=ox, sx=sx: ox + 95 + x * sx
+        Y = lambda y: 130 - y * 32
+        b += [L(ox + 5, Y(0), ox + 190, Y(0), MU, .8), L(X(0), 20, X(0), 225, MU, .8)]
+        for v, t in ((lo, ''), (hi, '')):
+            b.append(L(ox + 5, Y(v), ox + 190, Y(v), MU, .8, .7, '3 4'))
+        b += [T(X(0) - 4, Y(hi) - 3, {math.pi: 'π', math.pi / 2: 'π/2'}[hi], MU, 9, 'end'),
+              T(X(0) - 4, Y(lo) + 11, {0: '', -math.pi / 2: '−π/2'}[lo], MU, 9, 'end')]
+        b += [P(sg, OR, 2) for sg in _plot(fn, x0, x1, X, Y)]
+        if x1 == 1:
+            b += [C(X(-1), Y(fn(-1)), 3, OR), C(X(1), Y(fn(1)), 3, OR), T(X(-1), Y(0) + 13, '−1', MU, 9, 'middle'), T(X(1), Y(0) + 13, '1', MU, 9, 'middle')]
+        b += [T(ox + 95, 245, lab, YE, 12, 'middle'), T(ox + 95, 262, rng, MU, 10, 'middle')]
+    return svg(670, 272, b, '역삼각함수: 원래 함수의 정의역을 잘라 일대일로 만든 뒤 뒤집은 것')
+
+
+def hyperbolic():
+    b = []
+    s = 30
+    X = lambda x: 130 + x * s
+    Y = lambda y: 150 - y * s
+    b += _axes(0, 0, -3.6, 3.6, -2.4, 4.4, X, Y)
+    b += [P(sg, MU, 1, .9, dash='4 3') for sg in _plot(lambda x: math.exp(x) / 2, -3.6, 3.6, X, Y, -3, 4.4)]
+    b += [P(sg, MU, 1, .9, dash='4 3') for sg in _plot(lambda x: math.exp(-x) / 2, -3.6, 3.6, X, Y, -3, 4.4)]
+    b += [P(sg, YE, 2) for sg in _plot(math.cosh, -3.6, 3.6, X, Y, -3, 4.4)]
+    b += [P(sg, OR, 2) for sg in _plot(math.sinh, -3.6, 3.6, X, Y, -2.4, 4.4)]
+    b += [T(X(-3.5), Y(3.1), 'cosh x', YE, 11), T(X(2.1), Y(2.3), 'sinh x', OR, 11), T(X(-3.5), Y(.85), '½e⁻ˣ', MU, 9), T(X(2.6), Y(.85), '½eˣ', MU, 9),
+          C(X(0), Y(1), 3, YE), T(X(0) + 6, Y(1) + 12, '1', YE, 9)]
+    X2 = lambda x: 380 + x * 34
+    Y2 = lambda y: 150 - y * 45
+    b += _axes(0, 0, -3.6, 3.6, -1.6, 1.6, X2, Y2)
+    b += [L(X2(-3.6), Y2(1), X2(3.6), Y2(1), MU, .8, .7, '3 4'), L(X2(-3.6), Y2(-1), X2(3.6), Y2(-1), MU, .8, .7, '3 4')]
+    b += [P(sg, SKY, 2) for sg in _plot(math.tanh, -3.6, 3.6, X2, Y2)]
+    b += [T(X2(1.2), Y2(.55), 'tanh x', SKY, 11), T(X2(-3.5), Y2(1) - 4, 'y = 1', MU, 9), T(X2(2.3), Y2(-1) + 12, 'y = −1', MU, 9)]
+    b += [T(530, 32, 'cosh²x − sinh²x = 1', IV, 11, 'middle'), T(530, 52, '(cosh t, sinh t)는 쌍곡선 x² − y² = 1 위의 점', MU, 10, 'middle')]
+    return svg(670, 270, b, '쌍곡선함수: cosh와 sinh는 ½eˣ와 ½e⁻ˣ의 합과 차, tanh는 −1과 1 사이')
+
+
+def trigsub():
+    b = []
+    tri = [('√(a² − x²)', 'x = a sin θ', 'a', 'x', '√(a² − x²)', '1 − sin²θ = cos²θ'),
+           ('√(a² + x²)', 'x = a tan θ', '√(a² + x²)', 'x', 'a', '1 + tan²θ = sec²θ'),
+           ('√(x² − a²)', 'x = a sec θ', 'x', '√(x² − a²)', 'a', 'sec²θ − 1 = tan²θ')]
+    for k, (form, sub, hyp, opp, adj, ident) in enumerate(tri):
+        ox = 20 + k * 220
+        A, B, Cc = (ox + 20, 170), (ox + 170, 170), (ox + 170, 60)
+        b.append(f'<path d="M{A[0]} {A[1]}L{B[0]} {B[1]}L{Cc[0]} {Cc[1]}Z" fill="{YE}" fill-opacity=".07" stroke="{IV}" stroke-width="1.3"/>')
+        b += [P([(B[0] - 10, B[1]), (B[0] - 10, B[1] - 10), (B[0], B[1] - 10)], MU, 1),
+              f'<path d="M{A[0] + 26} {A[1]} A26 26 0 0 0 {A[0] + 26 * 0.807:.1f} {A[1] - 26 * 0.591:.1f}" fill="none" stroke="{OR}" stroke-width="1.2"/>',
+              T(A[0] + 32, A[1] - 6, 'θ', OR, 11),
+              T((A[0] + Cc[0]) / 2 - 8, (A[1] + Cc[1]) / 2 - 6, hyp, IV, 10, 'end'), T(B[0] + 6, (B[1] + Cc[1]) / 2 + 4, opp, IV, 10), T((A[0] + B[0]) / 2, B[1] + 16, adj, IV, 10, 'middle'),
+              T(ox + 95, 22, form, YE, 12, 'middle'), T(ox + 95, 40, sub, OR, 11, 'middle'), T(ox + 95, 212, ident, MU, 10, 'middle')]
+    return svg(700, 222, b, '삼각치환: 근호 꼴에 맞는 직각삼각형을 그리면 θ로 바꾸고 돌아오는 길이 보인다')
+
+
+def ptest():
+    b = []
+    X = lambda x: 60 + x * 95
+    Y = lambda y: 200 - y * 150
+    b += [L(X(0), Y(0), X(6.3), Y(0), MU, .8), L(X(0), Y(0) + 8, X(0), 15, MU, .8)]
+    pts = [(X(x), Y(1 / x ** 2)) for x in [1 + i * .02 for i in range(266)]]
+    b.append(f'<path d="M{X(1)} {Y(0)}L' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in pts) + f'L{X(6.3)} {Y(0)}Z" fill="{YE}" fill-opacity=".22"/>')
+    b += [P(sg, OR, 1.8) for sg in _plot(lambda x: 1 / x, .2, 6.3, X, Y, 0, 1.25)]
+    b += [P(sg, YE, 2) for sg in _plot(lambda x: 1 / x ** 2, .2, 6.3, X, Y, 0, 1.25)]
+    b += [L(X(1), Y(0), X(1), Y(1), MU, .8, .8, '3 3'), T(X(1), Y(0) + 14, '1', MU, 9, 'middle'),
+          T(X(.45), Y(1.18), 'y = 1/x²', YE, 11), T(X(2.7), Y(.47), 'y = 1/x', OR, 11),
+          T(X(4.2), 60, '∫₁^∞ 1/x² dx = 1   (p = 2 > 1, 수렴)', YE, 11, 'middle'), T(X(4.2), 82, '∫₁^∞ 1/x dx = ∞   (p = 1, 발산)', OR, 11, 'middle'),
+          T(X(4.2), 106, '둘 다 0으로 가지만 빠르기가 다르다', MU, 10, 'middle')]
+    return svg(670, 222, b, 'p판정: 1/x²의 꼬리 넓이는 유한하지만 1/x의 꼬리 넓이는 무한하다')
+
+
+def revolve():
+    b = []
+    f = lambda x: .55 + .35 * math.sin(x * 1.1) + .12 * x
+    X = lambda x: 40 + x * 55
+    Y = lambda y: 130 - y * 70
+    b += [L(X(-.2), Y(0), X(5.2), Y(0), MU, .8)]
+    up = [(X(x), Y(f(x))) for x in [.3 + i * .02 for i in range(221)]]
+    dn = [(X(x), Y(-f(x))) for x in [.3 + i * .02 for i in range(221)]]
+    b += [P(up, YE, 2), P(dn, YE, 1.2, .5, dash='4 3')]
+    for xx in (.3, 4.7):
+        r = f(xx) * 70
+        b.append(f'<ellipse cx="{X(xx):.1f}" cy="{Y(0):.1f}" rx="{r * .25:.1f}" ry="{r:.1f}" fill="none" stroke="{MU}" stroke-width="1"/>')
+    xs = 2.6
+    r = f(xs) * 70
+    b += [f'<ellipse cx="{X(xs):.1f}" cy="{Y(0):.1f}" rx="{r * .25:.1f}" ry="{r:.1f}" fill="{OR}" fill-opacity=".3" stroke="{OR}" stroke-width="1.4"/>',
+          L(X(xs), Y(0), X(xs), Y(f(xs)), OR, 1.2), T(X(xs) + 6, Y(f(xs) / 2), 'f(x)', OR, 10),
+          T(X(xs), 250, '단면 = 원판, 넓이 π f(x)²', OR, 10, 'middle'), T(X(.1), Y(0) - 6, 'x축', MU, 9, 'end')]
+    ox = 380
+    b += [L(ox, 190, ox + 260, 190, MU, .8), L(ox + 10, 200, ox + 10, 30, MU, .8)]
+    g = lambda t: 150 - 70 * math.sin(t / 60) - t * .15
+    b.append(P([(ox + 10 + t, g(t)) for t in range(0, 250, 3)], YE, 2))
+    p1, p2 = (ox + 30, g(20)), (ox + 80, g(70))
+    b += [L(*p1, *p2, OR, 2), L(p1[0], p1[1], p2[0], p1[1], IV, 1, .8, '3 3'), L(p2[0], p1[1], *p2, IV, 1, .8, '3 3'),
+          T((p1[0] + p2[0]) / 2, p1[1] + 14, 'Δx', IV, 10, 'middle'), T(p2[0] + 5, (p1[1] + p2[1]) / 2 + 4, 'Δy', IV, 10),
+          T((p1[0] + p2[0]) / 2 - 8, (p1[1] + p2[1]) / 2 - 8, 'ΔL', OR, 11, 'end'),
+          T(ox + 130, 222, 'ΔL = √(1 + (Δy/Δx)²) Δx', IV, 11, 'middle'), T(ox + 130, 242, '→ L = ∫ √(1 + f′(x)²) dx', YE, 11, 'middle')]
+    return svg(670, 260, b, '회전체의 부피는 원판 단면을 쌓아서, 곡선의 길이는 작은 빗변을 더해서 구한다')
+
+
+FIGS.update({f.__name__: f for f in [invmirror, growth, arctrig, hyperbolic, trigsub, ptest, revolve]})
