@@ -98,7 +98,7 @@ SUBJECTS = [
      '`while (n-- > 2)`는 비교한 뒤 줄이니, 마지막 비교가 거짓이어도 한 번 더 줄어요.',
    ]),
   ]),
- dict(id='chemistry', name='Chemistry', ko='화학', term='2026 FALL', status='notes',
+ dict(id='chemistry', name='Chemistry', ko='화학', term='2026', status='notes',
   intro='대학화학, 재료물성개론, 재료화학개론을 한곳에 모았어요. 과목을 넘나드는 개념은 지식 그래프에서 서로 이어 볼 수 있어요.',
   chips=['대학화학 6–14장', '재료물성개론 1–6주차', '재료화학개론'], graph='./input-graph.html',
   groups=[
@@ -255,9 +255,9 @@ def render_rows():
     return ''.join(rows)
 
 PAGE = '''<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="Input: 학교에서 공부한 것들을 과목별로 정리한 노트."><title>Input · dandellas</title><link rel="icon" href="./assets/seed.svg"><link rel="stylesheet" href="./fonts.css"><link rel="stylesheet" href="./input.css"><script src="./input.js" defer></script><script src="./crystal-viewer.js" defer></script><script src="./math-labs.js" defer></script></head>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><meta name="description" content="seeding: 학교에서 공부한 것들을 과목별로 정리한 노트."><title>seeding · dandellas</title><link rel="icon" href="./assets/seed.svg"><link rel="stylesheet" href="./fonts.css"><link rel="stylesheet" href="./input.css"><script src="./input.js" defer></script><script src="./crystal-viewer.js" defer></script><script src="./math-labs.js" defer></script></head>
 <body class="input-page"><a class="skip" href="#notes">Skip to notes</a>
-<header class="site-header"><a class="site-name" href="./input.html">Input</a><span class="header-center">Study notes</span><nav class="desktop-nav" aria-label="바로가기"><a href="./index.html">home</a><a href="./dandelion.html">dandelion</a><a href="./untitled.html">untitled</a></nav><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button></header>
+<header class="site-header"><a class="site-name" href="./input.html">seeding</a><span class="header-center">Study notes</span><nav class="desktop-nav" aria-label="바로가기"><a href="./index.html">home</a><a href="./dandelion.html">dandelion</a><a href="./untitled.html">untitled</a></nav><button type="button" id="menu-toggle" aria-expanded="false" aria-controls="mobile-menu">Menu</button></header>
 <nav id="mobile-menu" aria-label="모바일 바로가기" hidden><a href="./index.html">home</a><a href="./dandelion.html">dandelion</a><a href="./untitled.html">untitled</a></nav>
 <div class="input-shell">
 <aside class="subject-index" aria-labelledby="subjects-label"><h1 id="subjects-label">SUBJECTS / %(count)02d</h1><nav class="subject-list" aria-label="과목">%(rows)s</nav><p class="index-note">수업을 들으며 정리한 개념 노트예요. 시험 문제와 수업 자료 원문은 싣지 않아요.</p></aside>

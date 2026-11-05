@@ -11,7 +11,7 @@
     const target = notes.find(n => n.id === id) || inner?.closest('.note') || first;
     notes.forEach(n => { n.hidden = n !== target; });
     rows.forEach(r => { if (r.dataset.subject === target.id) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current'); });
-    document.title = `${target.querySelector('h2').textContent} · Input · dandellas`;
+    document.title = `${target.querySelector('h2').textContent} · seeding · dandellas`;
     if (inner && target.contains(inner)) { requestAnimationFrame(() => inner.scrollIntoView({ block: 'start' })); return; }
     if (focus) {
       const main = document.querySelector('#notes');

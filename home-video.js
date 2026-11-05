@@ -11,6 +11,12 @@ const GLYPHS = {"unitsPerEm":1000,"ascender":1135,"descender":-439,"from":{"text
   const playButton = document.querySelector('#video-play');
   const status = document.querySelector('#video-status');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  // The full intro plays once per visit (tab session). Coming back to home from
+  // another page in the same visit shows a calm loop and opens the menu at once.
+  const CALM_SRC = './assets/optimized/calm.08e4e203bf7f.mp4';
+  const SEEN_KEY = 'dandellas-intro-seen';
+  let returning = false;
+  try { returning = sessionStorage.getItem(SEEN_KEY) === '1'; } catch (error) { returning = false; }
   const TIMING = Object.freeze({videoLead:6500, fade:500, hold:700, morph:2200, autoOpen:5750});
   const morphStart = TIMING.fade + TIMING.hold;
   const introEnd = morphStart + TIMING.morph;
@@ -272,10 +278,21 @@ const GLYPHS = {"unitsPerEm":1000,"ascender":1135,"descender":-439,"from":{"text
       video.addEventListener('error', done, {once:true});
     });
   }
+  function startCalm() {
+    about.dataset.homeMode = 'calm';
+    video.src = CALM_SRC;
+    video.loop = true;
+    finishIntro(reduceMotion.matches);
+    autoOpenPending = false;
+    setOpen(true);
+    if (!reduceMotion.matches) { playbackStarted = true; void playVideo(); }
+  }
   async function start() {
     video.muted = true;
     video.defaultMuted = true;
     video.playsInline = true;
+    if (returning) return startCalm();
+    try { sessionStorage.setItem(SEEN_KEY, '1'); } catch (error) { /* storage blocked: every visit gets the intro */ }
     stage('waiting-video');
     requestAnimationFrame(watchForeground);
     // Start as soon as the DOM is ready. Font loading and the letter sequence

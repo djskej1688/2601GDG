@@ -25,13 +25,20 @@
       phase('relations', '03 / RELATIONS', 'A graph emerges', 2, 10, 15),
       phase('compare', '04 / COMPARE', 'Relationships are compared', 3, 15, 20),
       phase('whole', '05 / WHOLE', 'The connected whole', 4, 20, 24)
+    ]),
+    mch: Object.freeze([
+      phase('field', '01 / FIELD', 'A field of candidate points', 0, 0, 5),
+      phase('condition', '02 / CONDITION', 'A boundary is drawn', 1, 5, 10),
+      phase('hunt', '03 / HUNT', 'A scan sorts the points', 2, 10, 15),
+      phase('narrow', '04 / NARROW', 'The region tightens', 3, 15, 20),
+      phase('found', '05 / FOUND', 'One point remains', 4, 20, 24)
     ])
   });
 
   class ProjectFilm {
     constructor(canvas, options = {}) {
       this.canvas = canvas;
-      this.kind = options.kind === 'financial' ? 'financial' : 'lattice';
+      this.kind = ['financial', 'mch'].includes(options.kind) ? options.kind : 'lattice';
       this._duration = Number.isFinite(options.duration) && options.duration > 0 ? options.duration : 24;
       this._time = 0; this._playing = false; this._destroyed = false; this._raf = 0;
       this._anchor = 0; this._lastDraw = -Infinity; this._lastPhase = ''; this._ended = false;
@@ -153,7 +160,12 @@
           graph: { x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius },
           group, local, seed: rand(), size: .84 + rand() * .28 };
       });
-      this.geometryInfo = Object.freeze({ kind: this.kind, source: 'Original abstract invented geometry. No datasets.', points: this.kind === 'lattice' ? 48 : 54 });
+      const mrand = seeded(9127);
+      this._candidates = Array.from({ length: 77 }, (_, i) => ({
+        x: ((i % 11) - 5) * .19 + (mrand() - .5) * .07, y: (Math.floor(i / 11) - 3) * .2 + (mrand() - .5) * .07, seed: mrand()
+      }));
+      this._target = this._candidates.reduce((best, p) => (this._region(p, .32) < this._region(best, .32) ? p : best));
+      this.geometryInfo = Object.freeze({ kind: this.kind, source: 'Original abstract invented geometry. No datasets.', points: this.kind === 'lattice' ? 48 : this.kind === 'mch' ? 77 : 54 });
     }
     _line(a, b, alpha, ink = 'muted', width = .7, portion = 1) {
       if (alpha <= 0 || portion <= 0) return;
@@ -199,6 +211,7 @@
       c.scale(this._scale, this._scale);
       c.rotate(this._reduced ? Math.sin(time * .08) * .018 : Math.sin(t * .09) * .025);
       if (this.kind === 'financial') this._drawFinancial(t, this._reduced ? time * .12 : time);
+      else if (this.kind === 'mch') this._drawMch(t, this._reduced ? time * .12 : time);
       else this._drawLattice(t, this._reduced ? time * .12 : time);
       c.restore();
     }
@@ -271,6 +284,49 @@
           this._dot({ x: s * s * start.x + 2 * s * q * mid.x + q * q * end.x, y: s * s * start.y + 2 * s * q * mid.y + q * q * end.y }, 2.3, comparison * .85, 'yellow', true);
         }
       });
+    }
+    // Implicit region: < 1 means the point satisfies the (invented) condition. `k` shrinks it.
+    _region(p, k = 1) {
+      const y = p.y - .22 * Math.sin(p.x * 2.6);
+      return (p.x * p.x) / (.95 * .95 * k * k) + (y * y) / (.5 * .5 * k * k);
+    }
+    _drawMch(t, motion) {
+      const k = mix(1, .32, smooth(15, 20, t)), boundary = smooth(5, 9.5, t), scanAt = mix(-1.25, 1.25, smooth(10, 14.6, t));
+      const found = smooth(20, 22.5, t);
+      const c = this.ctx;
+      if (boundary > 0) {
+        c.beginPath();
+        for (let i = 0; i <= 160 * boundary; i++) {
+          const a = i / 160 * TAU, r = .95 * k, x = Math.sin(a) * r, y = -Math.cos(a) * .5 * k + .22 * Math.sin(x * 2.6);
+          i ? c.lineTo(x, y) : c.moveTo(x, y);
+        }
+        c.strokeStyle = color('yellow', .55 * boundary * (1 - found * .5)); c.lineWidth = 1 / this._scale;
+        c.setLineDash([5 / this._scale, 4 / this._scale]); c.stroke(); c.setLineDash([]);
+      }
+      const scanning = smooth(10, 10.6, t) * (1 - smooth(14.4, 15, t));
+      if (scanning > 0) {
+        this._line({ x: scanAt, y: -.82 }, { x: scanAt, y: .82 }, scanning * .7, 'ivory', 1.1);
+        c.fillStyle = color('ivory', scanning * .04); c.fillRect(scanAt - .18, -.82, .18, 1.64);
+      }
+      this._candidates.forEach((p, i) => {
+        const drift = this._reduced ? 0 : (1 - smooth(9, 12, t)) * .012;
+        const q = { x: p.x + Math.sin(motion * .22 + i) * drift, y: p.y + Math.cos(motion * .19 + i * .6) * drift };
+        const entrance = .4 + .6 * smooth(p.seed * 2, 2.4 + p.seed * 2, t);
+        const scanned = t >= 15 || p.x < scanAt, inside = this._region(p, k) < 1;
+        const sorted = scanned ? smooth(10, 11, t) : 0;
+        if (p === this._target && found > 0) return;
+        const alpha = entrance * mix(.62, inside ? .92 : .16, sorted) * (1 - found * .55);
+        this._dot(q, inside ? mix(1.5, 2.1, sorted) : 1.4, alpha, inside && sorted > 0 ? 'yellow' : 'ivory', inside && sorted > .5 && k < .5);
+      });
+      if (found > 0) {
+        const p = this._target, pulse = this._reduced ? .5 : .5 + .5 * Math.sin(motion * 1.4);
+        this._dot(p, 3.4, .95 * found, 'yellow', true);
+        this._ellipse(p, .06 + pulse * .02, .06 + pulse * .02, 0, found * .5, 'yellow');
+        this._line({ x: p.x - .16, y: p.y }, { x: p.x - .08, y: p.y }, found * .6, 'yellow', 1);
+        this._line({ x: p.x + .08, y: p.y }, { x: p.x + .16, y: p.y }, found * .6, 'yellow', 1);
+        this._line({ x: p.x, y: p.y - .16 }, { x: p.x, y: p.y - .08 }, found * .6, 'yellow', 1);
+        this._line({ x: p.x, y: p.y + .08 }, { x: p.x, y: p.y + .16 }, found * .6, 'yellow', 1);
+      }
     }
   }
   ProjectFilm.PHASES = PHASES;
