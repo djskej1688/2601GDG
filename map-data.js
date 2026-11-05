@@ -17,7 +17,7 @@
       copy: T('개인의 경험을 집합으로 구조화하고, 집합 사이의 관계를 생성에 활용하는 격자 연구입니다. 현재 탐구 중인 연구 질문이며, 검증된 결과를 뜻하지 않습니다.',
         'A lattice study that structures personal experiences as sets and uses the relations between those sets for generation. It is a research question being explored, not a validated result.') },
     { id: 'mch', kind: 'project', label: T('Mathematical Condition Hunter (MCH)'), meta: 'UPCOMING · PROJECT', href: './project-mch.html',
-      copy: T('준비 중인 프로젝트입니다. 자세한 내용은 곧 공개할 예정입니다.', 'An upcoming project. Details will be shared soon.') },
+      copy: T('수능 수학 문항에서 조건을 찾아 식으로 바꾸는 과정을 따로 훈련하는 앱입니다. 입시를 준비하는 고등학생을 위해 기획하고 있습니다.', 'An app for practicing one step of CSAT math: finding the conditions in a problem and turning them into equations. Planned for high school students preparing for university admission.') },
     { id: 'graphrag', kind: 'concept', label: T('GraphRAG'), copy: T('지식 그래프에서 관련 사실을 찾아 언어 모델 답변의 근거로 쓰는 검색 증강 생성(RAG) 방식.', 'Retrieval-augmented generation (RAG) that retrieves facts from a knowledge graph as evidence for a language model’s answer.') },
     { id: 'vectorrag', kind: 'concept', label: T('VectorRAG'), copy: T('문서를 임베딩 벡터로 바꾸고, 질문과 비슷한 문단을 찾아 근거로 쓰는 RAG 방식.', 'RAG that embeds documents as vectors and retrieves the passages most similar to the question.') },
     { id: 'kg', kind: 'concept', label: T('Knowledge graph'), copy: T('개체를 노드로, 개체 사이의 관계를 엣지로 표현한 데이터 구조.', 'A data structure that represents entities as nodes and the relationships between them as edges.') },
@@ -32,6 +32,8 @@
     { id: 'finqa', kind: 'concept', label: T('Financial QA'), copy: T('FinDER, FinQA, TAT-QA 등 금융 문서 질의응답 데이터셋.', 'Question-answering datasets over financial documents, such as FinDER, FinQA and TAT-QA.') },
     { id: 'sets', kind: 'concept', label: T('Sets'), copy: T('원소들의 모임. 이 연구에서는 개인의 경험을 집합으로 나타냅니다.', 'Collections of elements. This study represents personal experiences as sets.') },
     { id: 'latticec', kind: 'concept', label: T('Lattice'), copy: T('두 원소마다 최소 상계와 최대 하계가 있는 부분순서 구조. 포함 관계로 정렬한 부분집합들이 대표적인 예입니다.', 'A partially ordered structure in which every pair of elements has a least upper bound and a greatest lower bound; subsets ordered by inclusion are a classic example.') },
+    { id: 'csat', kind: 'concept', label: T('수능 수학', 'CSAT math'), copy: T('대학수학능력시험의 수학 영역. MCH가 연습 문항으로 다루는 범위입니다.', 'The math section of the Korean college entrance exam (CSAT): the problems MCH uses for practice.') },
+    { id: 'formalize', kind: 'concept', label: T('조건 → 식', 'Condition → equation'), copy: T('문장으로 주어진 조건을 수식으로 옮기는 일. 예: 미분가능한 f가 x = 1에서 극값을 가지면 f′(1) = 0.', 'Turning a condition stated in words into an equation, e.g. a differentiable f with an extremum at x = 1 gives f′(1) = 0.') },
     { id: 'experience', kind: 'concept', label: T('Personal experience'), copy: T('한 사람이 겪고 기록한 일들. 이 연구가 구조화하려는 대상입니다.', 'What a person has lived through and recorded: the material this study sets out to structure.') },
     { id: 'ideation', kind: 'concept', label: T('Idea generation'), copy: T('요소 사이의 관계를 활용해 새로운 아이디어를 만들어 내는 과정.', 'Producing new ideas by drawing on relations between existing elements.') }
   ];
@@ -42,6 +44,7 @@
     ['financial', 'graphrag'], ['financial', 'vectorrag'], ['financial', 'kg'], ['financial', 'neo4j'], ['financial', 'tenk'],
     ['financial', 'finqa'], ['financial', 'judge'], ['financial', 'provenance'],
     ['lattice', 'sets'], ['lattice', 'latticec'], ['lattice', 'experience'], ['lattice', 'ideation'],
+    ['mch', 'csat'], ['mch', 'formalize'], ['csat', 'formalize'],
     ['graphrag', 'kg'], ['graphrag', 'vectorrag'], ['kg', 'hetionet'], ['kg', 'neo4j'], ['pocket', 'allosteric'], ['sets', 'latticec'], ['experience', 'sets']
   ];
   const NOTE = T('배치는 물리 시뮬레이션으로 정해지며, 선은 프로젝트가 다루는 개념을 뜻합니다. 관계의 강도나 중요도를 나타내지 않습니다.',
