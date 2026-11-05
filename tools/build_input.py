@@ -98,7 +98,7 @@ SUBJECTS = [
      '`while (n-- > 2)`는 비교한 뒤 줄이니, 마지막 비교가 거짓이어도 한 번 더 줄어요.',
    ]),
   ]),
- dict(id='chemistry', name='Chemistry', ko='화학', term='2026 FALL', status='notes',
+ dict(id='chemistry', name='Chemistry', ko='화학', term='2026', status='notes',
   intro='대학화학, 재료물성개론, 재료화학개론을 한곳에 모았어요. 과목을 넘나드는 개념은 지식 그래프에서 서로 이어 볼 수 있어요.',
   chips=['대학화학 6–14장', '재료물성개론 1–6주차', '재료화학개론'], graph='./input-graph.html',
   groups=[
