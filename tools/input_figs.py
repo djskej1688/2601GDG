@@ -1,0 +1,658 @@
+# 2D explanatory figures (inline SVG) for the Input notes, drawn in the site palette.
+import math
+
+IV, YE, MU, AM, OR, TX, SKY = '#dde1c7', '#e0d67b', '#789278', '#b59255', '#f79234', '#e8eadb', '#8cbecd'
+FONT = 'font-family="SairaStencil, NotoSerifKR, sans-serif"'
+
+
+def T(x, y, s, fill=TX, size=11, anchor='start', op=1.0):
+    return f'<text x="{x:.1f}" y="{y:.1f}" {FONT} font-size="{size}" fill="{fill}" fill-opacity="{op}" text-anchor="{anchor}">{s}</text>'
+
+
+def L(x1, y1, x2, y2, c=MU, w=1, op=1.0, dash=None):
+    d = f' stroke-dasharray="{dash}"' if dash else ''
+    return f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" stroke="{c}" stroke-width="{w}" stroke-opacity="{op}"{d}/>'
+
+
+def C(x, y, r, fill=IV, op=1.0, stroke=None):
+    s = f' stroke="{stroke}" stroke-width=".9"' if stroke else ''
+    return f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{r:.1f}" fill="{fill}" fill-opacity="{op}"{s}/>'
+
+
+def P(pts, c=YE, w=1.6, op=1.0, fill='none', dash=None):
+    d = ' '.join(('M' if i == 0 else 'L') + f'{x:.1f} {y:.1f}' for i, (x, y) in enumerate(pts))
+    ds = f' stroke-dasharray="{dash}"' if dash else ''
+    return f'<path d="{d}" fill="{fill}" stroke="{c}" stroke-width="{w}" stroke-opacity="{op}"{ds}/>'
+
+
+def arrow(x1, y1, x2, y2, c=YE, w=1.4):
+    a = math.atan2(y2 - y1, x2 - x1)
+    h = [(x2, y2), (x2 - 7 * math.cos(a - .45), y2 - 7 * math.sin(a - .45)), (x2 - 7 * math.cos(a + .45), y2 - 7 * math.sin(a + .45))]
+    return L(x1, y1, x2, y2, c, w) + f'<path d="M{h[0][0]:.1f} {h[0][1]:.1f}L{h[1][0]:.1f} {h[1][1]:.1f}L{h[2][0]:.1f} {h[2][1]:.1f}Z" fill="{c}"/>'
+
+
+def svg(w, h, body, title):
+    return (f'<svg viewBox="0 0 {w} {h}" width="100%" display="block" role="img" aria-label="{title}">'
+            f'<title>{title}</title>{"".join(body)}</svg>')
+
+
+def bohr():
+    b, levels = [], [(1, -13.6), (2, -3.4), (3, -1.51), (4, -.85), (5, -.54)]
+    y = lambda e: 30 + (e / -13.6) * 200
+    for n, e in levels:
+        b += [L(70, y(e), 600, y(e), IV, 1, .7), T(64, y(e) + 4, f'n = {n}', MU, 10, 'end'), T(606, y(e) + 4, f'{e} eV', MU, 10)]
+    b += [L(70, 22, 600, 22, IV, 1, .4, '3 3'), T(64, 26, 'n = ∞', MU, 10, 'end'), T(606, 26, '0 eV', MU, 10)]
+    for k, (n, nf, c) in enumerate([(i, 1, OR) for i in (2, 3, 4, 5)] + [(i, 2, YE) for i in (3, 4, 5)] + [(i, 3, SKY) for i in (4, 5)]):
+        x = 110 + k * 46 + (40 if nf > 1 else 0) + (40 if nf > 2 else 0)
+        b.append(arrow(x, y(levels[n - 1][1]), x, y(levels[nf - 1][1]) - 2, c, 1.3))
+    b += [T(185, 250, 'Lyman (→ n = 1, 자외선)', OR, 10, 'middle'), T(370, 250, 'Balmer (→ n = 2, 가시광선)', YE, 10, 'middle'), T(520, 250, 'Paschen (→ n = 3)', SKY, 10, 'middle')]
+    return svg(660, 262, b, '수소 원자의 에너지 준위와 스펙트럼 계열')
+
+
+def bondcurve():
+    b = [L(60, 20, 60, 230), L(60, 130, 610, 130), T(615, 134, 'r', MU, 11), T(56, 18, 'E', MU, 11, 'end')]
+    X = lambda r: 60 + (r - .6) / 2.4 * 540
+    Y = lambda e: 130 - e * 70
+    rep = lambda r: .9 / r ** 9
+    att = lambda r: -1.0 / r
+    rs = [0.62 + i * 0.01 for i in range(240)]
+    b.append(P([(X(r), Y(min(1.4, rep(r)))) for r in rs], SKY, 1.3, .9))
+    b.append(P([(X(r), Y(max(-1.4, att(r)))) for r in rs], OR, 1.3, .9))
+    tot = [(r, rep(r) + att(r)) for r in rs]
+    b.append(P([(X(r), Y(max(-1.4, min(1.4, e)))) for r, e in tot], YE, 2))
+    r0, e0 = min(tot, key=lambda t: t[1])
+    b += [L(X(r0), Y(e0), X(r0), 130, IV, 1, .7, '3 3'), T(X(r0), 146, 'r₀', IV, 11, 'middle'), C(X(r0), Y(e0), 3.5, YE),
+          L(X(r0) + 6, Y(e0), X(r0) + 70, Y(e0), IV, .8, .6, '2 3'), T(X(r0) + 74, Y(e0) + 4, 'E₀ (결합 에너지)', IV, 10),
+          T(X(.75), 40, '반발 +b/rⁿ', SKY, 10), T(X(1.6), 196, '인력 −e²/(4πε₀r)', OR, 10), T(X(1.9), 116, '합 (최저점 = 평형)', YE, 10)]
+    return svg(660, 240, b, '이온 사이 거리에 따른 인력, 반발, 합 에너지 곡선')
+
+
+def waves():
+    b = []
+    for row, (title, loc) in enumerate([('국소화된 파동 (원자에 묶인 전자)', True), ('비국소화된 파동 (결정 전체에 퍼진 전자)', False)]):
+        y0 = 40 + row * 110
+        b.append(T(20, y0 - 18, title, YE if loc else OR, 11))
+        pts = []
+        for i in range(400):
+            x = 30 + i * 1.5
+            v = math.exp(-((x - 225) / 18) ** 2) if loc else .55 + .45 * math.cos((x - 30) / 60 * 2 * math.pi)
+            pts.append((x, y0 + 50 - v * 42))
+        b.append(P(pts, YE if loc else OR, 1.8))
+        for k in range(9):
+            b.append(C(45 + k * 60, y0 + 62, 5, IV, .9))
+        b.append(L(30, y0 + 62, 630, y0 + 62, MU, .8, .6))
+        b.append(T(632, y0 + 30, '|ψ|²', MU, 10))
+    return svg(660, 250, b, '원자 하나에 모인 국소화된 파동과 결정 전체에 퍼진 비국소화된 파동')
+
+
+def bandsplit():
+    b = [L(40, 20, 40, 230), T(36, 18, 'E', MU, 11, 'end')]
+    cols = [(1, 90), (2, 180), (3, 270), (4, 360), (8, 450)]
+    for n, x in cols:
+        filled = n / 2
+        for k in range(n):
+            e = 0 if n == 1 else (k / (n - 1) - .5) * 2 * (.35 + .5 * (1 - 1 / n))
+            y = 125 - e * 70
+            occ = k < math.floor(filled) or (n == 1)
+            half = (n % 2 == 1) and k == n // 2
+            c = YE if occ or half else IV
+            b.append(L(x - 30, y, x + 30, y, c, 2 if occ else 1.2, 1 if occ else .55))
+            if half and n > 1:
+                b.append(T(x + 34, y + 4, 'nonbonding', IV, 9, 'start', .8))
+        b.append(T(x, 238, f'N = {n}', MU, 11, 'middle'))
+    b += [f'<rect x="510" y="45" width="70" height="80" fill="{YE}" fill-opacity=".5"/>', f'<rect x="510" y="125" width="70" height="80" fill="{IV}" fill-opacity=".12" stroke="{IV}" stroke-opacity=".4"/>',
+          T(545, 238, 'N ≈ 10²³', MU, 11, 'middle'), T(586, 90, '채워진 상태', YE, 10), T(586, 170, '빈 상태', IV, 10),
+          T(90, 30, '원자 하나의 2s 준위', IV, 10, 'middle', .8)]
+    return svg(660, 250, b, '원자 수 N이 늘수록 하나의 준위가 N개로 갈라져 띠가 되는 모습. 원자마다 전자 하나면 아래 절반이 채워진다')
+
+
+def bandtypes():
+    b = []
+    specs = [('금속', 'Li, Cu', 'half'), ('반도체', 'Si, Eg ≈ 1.1 eV', 1.1), ('절연체', '다이아몬드, Eg > 4 eV', 5.0)]
+    for i, (name, ex, gap) in enumerate(specs):
+        x = 40 + i * 210
+        b.append(T(x + 70, 22, name, YE, 12, 'middle'))
+        if gap == 'half':
+            b += [f'<rect x="{x}" y="50" width="140" height="160" fill="{IV}" fill-opacity=".1" stroke="{IV}" stroke-opacity=".5"/>',
+                  f'<rect x="{x}" y="130" width="140" height="80" fill="{YE}" fill-opacity=".55"/>',
+                  L(x - 6, 130, x + 146, 130, OR, 1.2, 1, '4 3'), T(x + 70, 124, '반만 찬 띠', OR, 10, 'middle')]
+        else:
+            g = 18 + gap * 14
+            top = 130 - g
+            b += [f'<rect x="{x}" y="40" width="140" height="{top - 40:.0f}" fill="{IV}" fill-opacity=".1" stroke="{IV}" stroke-opacity=".5"/>',
+                  f'<rect x="{x}" y="130" width="140" height="80" fill="{YE}" fill-opacity=".55"/>',
+                  T(x + 70, top - 8 - (top - 40) / 2 + 12, '전도띠 (CB)', IV, 10, 'middle'),
+                  arrow(x + 150, 130, x + 150, top + 2, OR, 1.1), T(x + 156, (130 + top) / 2 + 4, 'Eg', OR, 10)]
+        b += [T(x + 70, 175, '원자가띠 (VB)', '#1a2414', 10, 'middle'), T(x + 70, 230, ex, MU, 10, 'middle')]
+    return svg(660, 240, b, '금속, 반도체, 절연체의 띠 구조 비교')
+
+
+def packing2d():
+    b = []
+    for i in range(4):
+        for j in range(4):
+            b.append(C(40 + i * 40, 40 + j * 40, 20, IV, .85, MU))
+    for j in range(4):
+        for i in range(4 if j % 2 == 0 else 3):
+            b.append(C(380 + i * 40 + (20 if j % 2 else 0), 40 + j * 34.64, 20, YE, .85, MU))
+    b += [T(100, 205, '정사각 배열', IV, 11, 'middle'), T(100, 222, 'π/4 ≈ 0.785, 배위수 4', MU, 10, 'middle'),
+          T(450, 180, '육방 (삼각) 배열', YE, 11, 'middle'), T(450, 197, 'π/(2√3) ≈ 0.907, 배위수 6', MU, 10, 'middle')]
+    return svg(660, 232, b, '2차원에서 정사각 배열과 육방 배열의 충진율 비교')
+
+
+def bravais2d():
+    b = []
+    panels = [('사각 (oblique)', (1, 0), (.35, .8), False), ('직사각 (rectangular)', (1.15, 0), (0, .75), False),
+              ('면심 직사각', (1.2, 0), (0, .9), True), ('육방 (hexagonal)', (.9, 0), (.45, .78), False), ('정사각 (square)', (.85, 0), (0, .85), False)]
+    for k, (name, a, bv, centered) in enumerate(panels):
+        ox, oy, s = 20 + k * 128, 30, 34
+        for i in range(-1, 4):
+            for j in range(-1, 4):
+                x, y = ox + 20 + (i * a[0] + j * bv[0]) * s, oy + 20 + (i * a[1] + j * bv[1]) * s
+                if ox + 4 < x < ox + 120 and oy + 4 < y < oy + 116:
+                    b.append(C(x, y, 3.2, IV, .9))
+                if centered:
+                    cx, cy = x + (a[0] + bv[0]) * s / 2, y + (a[1] + bv[1]) * s / 2
+                    if ox + 4 < cx < ox + 120 and oy + 4 < cy < oy + 116:
+                        b.append(C(cx, cy, 3.2, YE, .9))
+        x0, y0 = ox + 20 + s, oy + 20 + s
+        cell = [(x0, y0), (x0 + a[0] * s, y0 + a[1] * s), (x0 + (a[0] + bv[0]) * s, y0 + (a[1] + bv[1]) * s), (x0 + bv[0] * s, y0 + bv[1] * s), (x0, y0)]
+        b.append(P(cell, OR, 1.3))
+        b.append(T(ox + 60, 150, name, MU, 10, 'middle'))
+    return svg(660, 160, b, '2차원 Bravais 격자 다섯 가지')
+
+
+def latlines():
+    b = []
+    for k, (h, kk, name) in enumerate([(1, 0, '(100)'), (1, 1, '(110)'), (2, 1, '(210)'), (3, 1, '(310)')]):
+        ox = 15 + k * 160
+        for i in range(6):
+            for j in range(6):
+                b.append(C(ox + 15 + i * 22, 20 + j * 22, 2.6, IV, .9))
+        # traces of planes h x + k y = n on the square lattice (unit = 22 px)
+        for n in range(-8, 14):
+            pts = []
+            for t in [0, 5]:
+                if kk == 0:
+                    x, y = n / h, t
+                else:
+                    x, y = t, (n - h * t) / kk
+                pts.append((ox + 15 + x * 22, 20 + y * 22))
+            b.append(f'<g clip-path="url(#ll{k})">' + P(pts, YE, 1, .8) + '</g>')
+        b.append(f'<clipPath id="ll{k}"><rect x="{ox + 8}" y="13" width="124" height="124"/></clipPath>')
+        b.append(T(ox + 70, 158, name, YE, 11, 'middle'))
+    return svg(660, 168, b, '정사각 격자에서 (100), (110), (210), (310) 면의 흔적. 지수가 클수록 면 간격이 좁고 면 위 원자가 드물다')
+
+
+def xspectrum():
+    b = [L(60, 20, 60, 200), L(60, 200, 620, 200), T(620, 216, 'λ', MU, 11, 'end'), T(56, 18, 'I', MU, 11, 'end')]
+    X = lambda lam: 60 + lam * 330
+    for V, c, amp in [(25, YE, 1.0), (20, IV, .68), (15, MU, .42)]:
+        lmin = 12.398 / V
+        pts = []
+        for i in range(260):
+            lam = lmin + i * .006
+            v = amp * (1 - math.exp(-(lam - lmin) * 9)) * math.exp(-(lam - lmin) * 1.6)
+            if V == 25:
+                v += 1.25 * math.exp(-((lam - .7101) / .007) ** 2) + .45 * math.exp(-((lam - .6323) / .007) ** 2)
+            pts.append((X(lam), 200 - v * 110))
+        b.append(P(pts, c, 1.6))
+        b.append(T(X(lmin), 214, f'{V} kV', c, 9, 'middle'))
+    b += [T(X(.7101) + 6, 52, 'Kα', OR, 11), T(X(.6323) - 4, 140, 'Kβ', OR, 11, 'end'),
+          T(250, 230, 'λ_SWL = 12.398 / V(kV) Å (전압이 높을수록 왼쪽으로)', MU, 10, 'middle'), T(470, 120, '연속 스펙트럼 (제동 복사)', IV, 10)]
+    return svg(660, 240, b, 'Mo 타깃의 X선 스펙트럼 개략도: 전압에 따른 연속 스펙트럼과 Kα, Kβ 특성선')
+
+
+def xlevels():
+    b = []
+    shells = [('K (n = 1)', 200), ('L (n = 2)', 120), ('M (n = 3)', 75), ('N (n = 4)', 50)]
+    for name, y in shells:
+        b += [L(150, y, 560, y, IV, 1, .7), T(144, y + 4, name, MU, 10, 'end')]
+    b += [arrow(240, 120, 240, 198, OR), T(248, 165, 'Kα', OR, 11), arrow(320, 75, 320, 198, YE), T(328, 150, 'Kβ', YE, 11),
+          arrow(420, 75, 420, 118, SKY), T(428, 100, 'Lα', SKY, 11), arrow(490, 50, 490, 118, IV), T(498, 88, 'Lβ', IV, 11),
+          C(240, 200, 5, '#020906', 1, OR), T(200, 222, '먼저 K 껍질에 빈자리', OR, 10, 'middle')]
+    return svg(660, 232, b, 'K, L, M, N 껍질 사이 전이와 Kα, Kβ, Lα, Lβ 특성 X선')
+
+
+def nasoft():
+    b = []
+    for k, (name, band) in enumerate([('Na 기체', False), ('Na 고체', True)]):
+        x = 110 + k * 260
+        b += [L(x, 40, x + 160, 40, IV, 1, .4, '3 3'), T(x - 6, 44, '0', MU, 10, 'end'), L(x, 190, x + 160, 190, IV, 1.6), T(x + 166, 194, '2p (−38.7 eV)', MU, 10)]
+        if band:
+            b.append(f'<rect x="{x}" y="58" width="160" height="20" fill="{YE}" fill-opacity=".45" stroke="{YE}" stroke-opacity=".8"/>')
+            b += [T(x + 166, 72, '3s 띠', YE, 10), arrow(x + 50, 62, x + 50, 188, OR), arrow(x + 110, 76, x + 110, 188, OR), T(x + 80, 140, 'λ가 퍼짐', OR, 10, 'middle')]
+        else:
+            b += [L(x, 68, x + 160, 68, YE, 1.6), T(x + 166, 72, '3s (−5.01 eV)', YE, 10), arrow(x + 80, 70, x + 80, 188, OR), T(x + 88, 140, 'λ 하나', OR, 10)]
+        b.append(T(x + 80, 218, name, IV, 11, 'middle'))
+    return svg(660, 228, b, 'Na 기체와 고체에서 3s에서 2p로의 연 X선 전이 비교')
+
+
+def bragg():
+    b = []
+    for j, y in enumerate([70, 140, 210]):
+        b.append(L(40, y, 620, y, MU, .8, .6))
+        for i in range(9):
+            b.append(C(70 + i * 65, y, 6, IV, .9))
+    th = math.radians(28)
+    def ray(x0, y0):
+        dx, dy = math.cos(th), math.sin(th)
+        return (x0 - 230 * dx, y0 - 230 * dy, x0, y0, x0 + 230 * dx, y0 - 230 * dy)
+    for (x0, y0), c in [((330, 70), YE), ((330, 140), OR)]:
+        a, bb, c0, d0, e, f = ray(x0, y0)
+        b += [arrow(a, bb, c0 - 6 * math.cos(th), d0 - 6 * math.sin(th), c, 1.5), arrow(c0, d0, e, f, c, 1.5)]
+    # path difference segments
+    d = 70
+    px, py = 330 - d * math.sin(th) * math.cos(th), 70 + d * math.sin(th) * math.sin(th)
+    qx, qy = 330 + d * math.sin(th) * math.cos(th), 70 + d * math.sin(th) * math.sin(th)
+    b += [L(330, 70, px, py, IV, .8, .8, '3 3'), L(330, 70, qx, qy, IV, .8, .8, '3 3'),
+          P([(px, py), (330, 140)], SKY, 2.4), P([(330, 140), (qx, qy)], SKY, 2.4),
+          T(250, 128, 'd sin θ', SKY, 10, 'end'), T(410, 128, 'd sin θ', SKY, 10),
+          L(600, 70, 600, 140, IV, 1), T(606, 110, 'd', IV, 11), T(150, 60, 'θ', YE, 11), T(500, 60, 'θ', YE, 11),
+          T(330, 240, '경로차 2d·sin θ = nλ 이면 보강 간섭', YE, 11, 'middle')]
+    return svg(660, 250, b, 'Bragg 법칙: 두 원자면에서 반사된 X선의 경로차')
+
+
+def sticks():
+    b = []
+    allowed = {
+        'SC': lambda h, k, l: True,
+        'BCC': lambda h, k, l: (h + k + l) % 2 == 0,
+        'FCC': lambda h, k, l: len({h % 2, k % 2, l % 2}) == 1,
+    }
+    hkls = {}
+    for h in range(4):
+        for k in range(h + 1):
+            for l in range(k + 1):
+                if h + k + l:
+                    N = h * h + k * k + l * l
+                    hkls.setdefault(N, f'{h}{k}{l}')
+    X = lambda N: 80 + N * 37
+    for r, (name, ok) in enumerate(allowed.items()):
+        y = 50 + r * 62
+        b += [L(70, y, 630, y, MU, .8, .6), T(60, y + 4, name, YE, 11, 'end')]
+        for N in range(1, 16):
+            if N in hkls:
+                h, k, l = map(int, hkls[N])
+                if ok(h, k, l):
+                    b += [L(X(N), y, X(N), y - 30, OR, 2.2), T(X(N), y + 14, f'({hkls[N]})', IV, 8, 'middle', .85)]
+    for N in range(1, 16):
+        b.append(T(X(N), 238, str(N), MU, 9, 'middle'))
+    b.append(T(345, 252, 'N = h² + k² + l² (sin²θ에 비례, 7과 15는 만들 수 없음)', MU, 10, 'middle'))
+    return svg(660, 260, b, 'SC, BCC, FCC에서 나타나는 회절 봉우리의 위치와 지수')
+
+
+FIGS = {f.__name__: f for f in [bohr, bondcurve, waves, bandsplit, bandtypes, packing2d, bravais2d, latlines, xspectrum, xlevels, nasoft, bragg, sticks]}
+
+
+# ---------- calculus figures ----------
+def _polar_path(fn, cx, cy, s, t0=0.0, t1=2 * math.pi, steps=320, angle=None):
+    segs, cur = [], []
+    for i in range(steps + 1):
+        t = t0 + (t1 - t0) * i / steps
+        v = fn(t)
+        if angle is not None:
+            v, t = t, angle
+        if v is None:
+            if cur: segs.append(cur); cur = []
+            continue
+        cur.append((cx + v * math.cos(t) * s, cy - v * math.sin(t) * s))
+    if cur: segs.append(cur)
+    return segs
+
+
+def _panel(x0, y0, w, label, curves, rmax, note=None, fill=None):
+    cx, cy, s = x0 + w / 2, y0 + w / 2, (w / 2 - 10) / rmax
+    b = [L(x0 + 6, cy, x0 + w - 6, cy, MU, .7, .6), L(cx, y0 + 6, cx, y0 + w - 6, MU, .7, .6)]
+    if fill:
+        for seg in _polar_path(*fill[0], cx=cx, cy=cy, s=s, **fill[1]):
+            b.append(f'<path d="M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in seg) + f'Z" fill="{OR}" fill-opacity=".28" stroke="none"/>')
+    for fn, c, kw in curves:
+        for seg in _polar_path(fn, cx, cy, s, **kw):
+            b.append(P(seg, c, 1.6))
+    b.append(T(cx, y0 + w + 14, label, YE, 11, 'middle'))
+    if note: b.append(T(cx, y0 + w + 28, note, MU, 9.5, 'middle'))
+    return b
+
+
+def _gallery(items, title, cols=4, w=140):
+    b = []
+    for k, it in enumerate(items):
+        x0, y0 = 10 + (k % cols) * (w + 22), 6 + (k // cols) * (w + 46)
+        b += _panel(x0, y0, w, *it)
+    rows = (len(items) + cols - 1) // cols
+    return svg(10 + cols * (w + 22), rows * (w + 46) + 4, b, title)
+
+
+def polarcircles():
+    cos, sin = math.cos, math.sin
+    return _gallery([('r = 2', [(lambda t: 2, YE, {})], 4.5), ('θ = π/4', [(lambda t: t, YE, dict(t0=-4, t1=4, steps=2, angle=math.pi / 4))], 4.5, '원점을 지나는 직선'),
+                     ('r = 6 sin θ', [(lambda t: 6 * sin(t), YE, dict(t1=math.pi))], 6.5, '중심 (0, 3), 반지름 3'),
+                     ('r = 4 cos θ', [(lambda t: 4 * cos(t), YE, dict(t1=math.pi))], 4.5, '중심 (2, 0), 반지름 2')], '극좌표의 원과 직선')
+
+
+
+def roses():
+    sin, cos = math.sin, math.cos
+    return _gallery([('r = sin 3θ', [(lambda t: sin(3 * t), YE, {})], 1.1, 'n = 3 홀수 → 3잎'),
+                     ('r = cos 3θ', [(lambda t: cos(3 * t), YE, {})], 1.1, 'n = 3 홀수 → 3잎'),
+                     ('r = sin 2θ', [(lambda t: sin(2 * t), YE, {})], 1.1, 'n = 2 짝수 → 4잎'),
+                     ('r = cos 2θ', [(lambda t: cos(2 * t), YE, {})], 1.1, 'n = 2 짝수 → 4잎')], '장미 곡선: n이 홀수면 n잎, 짝수면 2n잎')
+
+
+def limacons():
+    cos = math.cos
+    items = []
+    for a, name in [(.5, '안쪽 고리 (a/b < 1)'), (1, '심장형 (a/b = 1)'), (1.5, '오목 (1 < a/b < 2)'), (2, '볼록 (a/b ≥ 2)')]:
+        items.append((f'r = {a:g} + cos θ', [(lambda t, a=a: a + cos(t), YE, {})], 3.2, name))
+    return _gallery(items, 'r = a + b cos θ에서 a/b에 따라 바뀌는 리마송 모양 (b = 1)')
+
+
+def lemniscates():
+    def sq(f):
+        return lambda t: math.sqrt(f(t)) if f(t) >= 0 else None
+    def sqn(f):
+        return lambda t: -math.sqrt(f(t)) if f(t) >= 0 else None
+    c2 = lambda t: math.cos(2 * t)
+    s2 = lambda t: math.sin(2 * t)
+    c1 = lambda t: math.cos(t)
+    return _gallery([('r² = cos 2θ', [(sq(c2), YE, {}), (sqn(c2), YE, {})], 1.1, '∞ 모양, x축 방향'),
+                     ('r² = sin 2θ', [(sq(s2), YE, {}), (sqn(s2), YE, {})], 1.1, 'y = x 방향'),
+                     ('r² = cos θ', [(sq(c1), YE, {}), (sqn(c1), YE, {})], 1.1, '두 고리'),
+                     ('r = 2θ (θ ≥ 0)', [(lambda t: 2 * t, YE, dict(t1=4 * math.pi, steps=500))], 26, '나선')], '리본형(r² 꼴)과 나선. 우변이 음수인 구간에는 점이 없다')
+
+
+def polararea():
+    cos, pi = math.cos, math.pi
+    items = [
+        ('r = 2(1 + cos θ)', [(lambda t: 2 * (1 + cos(t)), YE, {})], 4.4, '전체 넓이 6π', ((lambda t: 2 * (1 + cos(t)),), {})),
+        ('r = 1 + 2cos θ', [(lambda t: 1 + 2 * cos(t), YE, {})], 3.2, '작은 고리 π − 3√3/2', ((lambda t: 1 + 2 * cos(t),), dict(t0=2 * pi / 3, t1=4 * pi / 3))),
+        ('r = 1 밖 / r = 1 − cos θ', [(lambda t: 1, YE, {}), (lambda t: 1 - cos(t), SKY, {})], 2.2, '원 안 ∩ 심장형 밖 = 2 − π/4', None),
+    ]
+    b = []
+    w = 180
+    for k, (label, curves, rmax, note, fill) in enumerate(items):
+        x0, y0 = 10 + k * (w + 30), 6
+        cx, cy, s = x0 + w / 2, y0 + w / 2, (w / 2 - 10) / rmax
+        if k == 2:
+            pts = []
+            for i in range(181):
+                t = -pi / 2 + pi * i / 180
+                pts.append((cx + cos(t) * s, cy - math.sin(t) * s))
+            for i in range(181):
+                t = pi / 2 - pi * i / 180
+                r = 1 - cos(t)
+                pts.append((cx + r * cos(t) * s, cy - r * math.sin(t) * s))
+            b.append('<path d="M' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in pts) + f'Z" fill="{OR}" fill-opacity=".3"/>')
+            b += _panel(x0, y0, w, label, curves, rmax, note)
+        else:
+            b += _panel(x0, y0, w, label, curves, rmax, note, fill=(fill[0], fill[1]))
+    return svg(10 + 3 * (w + 30), w + 50, b, '극좌표 넓이 예제 세 개 (주황이 구하는 넓이)')
+
+
+def detarea():
+    b = [L(60, 200, 400, 200, MU, .8), L(80, 220, 80, 20, MU, .8)]
+    o, u, v = (80, 200), (240, 160), (130, 70)
+    q = (u[0] + v[0] - o[0], u[1] + v[1] - o[1])
+    b.append(f'<path d="M{o[0]} {o[1]}L{u[0]} {u[1]}L{q[0]} {q[1]}L{v[0]} {v[1]}Z" fill="{YE}" fill-opacity=".25" stroke="{YE}" stroke-width="1.2"/>')
+    b += [arrow(*o, *u, OR, 1.8), arrow(*o, *v, SKY, 1.8), T(u[0] + 6, u[1] + 14, '(a, b) = 1행', OR, 10), T(v[0] - 4, v[1] - 6, '(c, d) = 2행', SKY, 10, 'end'),
+          T(205, 120, '넓이 = |ad − bc|', YE, 11, 'middle'),
+          T(430, 60, '한 행을 k배 → 넓이 k배', IV, 10), T(430, 82, '두 행 교환 → 방향(부호) 반대', IV, 10), T(430, 104, '두 행이 비례 → 납작, det = 0', IV, 10), T(430, 126, '한 행에 다른 행 배수 더하기', IV, 10), T(440, 144, '→ 밑변·높이 그대로, det 불변', MU, 10)]
+    return svg(660, 230, b, '2×2 행렬식은 두 행벡터가 만드는 평행사변형의 부호 있는 넓이')
+
+
+def epsband():
+    b = [L(60, 200, 620, 200, MU, .8), L(60, 210, 60, 20, MU, .8)]
+    L0, eps = 110, 28
+    b += [L(60, L0 - eps, 620, L0 - eps, IV, 1, .6), L(60, L0 + eps, 620, L0 + eps, IV, 1, .6), L(60, L0, 620, L0, YE, 1, .8, '4 3'),
+          f'<rect x="300" y="{L0 - eps}" width="320" height="{2 * eps}" fill="{YE}" fill-opacity=".08"/>',
+          T(626, L0 + 4, 'L', YE, 11), T(626, L0 - eps + 4, 'L + ε', IV, 10), T(626, L0 + eps + 4, 'L − ε', IV, 10),
+          L(300, 30, 300, 205, OR, 1, .8, '3 3'), T(300, 220, 'N', OR, 11, 'middle')]
+    for n in range(1, 25):
+        y = L0 + 85 * (-1) ** n / (n ** 0.9) * (1 if n < 3 else .9)
+        b.append(C(60 + n * 23, y, 3.4, OR if 60 + n * 23 > 300 else IV, .95))
+    b.append(T(180, 222, 'n > N이면 모든 aₙ이 띠 안에 들어간다', MU, 10, 'middle'))
+    return svg(660, 232, b, '수열의 수렴: n이 N보다 크면 모든 항이 L ± ε 띠 안에 있다')
+
+
+def integraltest():
+    b = [L(60, 200, 620, 200, MU, .8), L(60, 210, 60, 15, MU, .8)]
+    X = lambda x: 60 + (x - .5) * 70
+    Y = lambda y: 200 - y * 150
+    f = lambda x: 1 / x ** 1.5
+    for n in range(2, 9):
+        b.append(f'<rect x="{X(n - 1):.1f}" y="{Y(f(n)):.1f}" width="70" height="{200 - Y(f(n)):.1f}" fill="{OR}" fill-opacity=".3" stroke="{OR}" stroke-opacity=".8"/>')
+        b.append(T(X(n - 1) + 35, Y(f(n)) - 4, f'a{chr(0x2080 + n)}', OR, 9, 'middle'))
+    b.append(P([(X(x), Y(f(x))) for x in [1 + i * .02 for i in range(400)]], YE, 2))
+    for n in range(1, 9):
+        b.append(T(X(n), 214, str(n), MU, 9, 'middle'))
+    b += [T(X(1.3), Y(1) + 4, 'y = f(x)', YE, 11), T(400, 70, 'a₂ + a₃ + … ≤ ∫₁^∞ f(x) dx', IV, 11, 'middle'), T(400, 90, '적분이 유한하면 부분합에 천장이 생겨 수렴', MU, 10, 'middle')]
+    return svg(660, 226, b, '적분판정법: 각 항을 폭 1인 직사각형으로 보면 곡선 아래에 들어간다')
+
+
+FIGS.update({f.__name__: f for f in [polarcircles, roses, limacons, lemniscates, polararea, detarea, epsband, integraltest]})
+
+
+# ---------- general chemistry (1st semester) ----------
+def ietrend():
+    data = [('Li', 520), ('Be', 899), ('B', 801), ('C', 1086), ('N', 1402), ('O', 1314), ('F', 1681), ('Ne', 2081)]
+    X = lambda i: 80 + i * 72
+    Y = lambda v: 200 - v / 2200 * 175
+    b = [L(60, 200, 620, 200, MU, .8), L(60, 205, 60, 15, MU, .8), T(56, 16, 'IE₁ (kJ/mol)', MU, 10, 'start')]
+    b.append(P([(X(i), Y(v)) for i, (_, v) in enumerate(data)], YE, 1.8))
+    for i, (el, v) in enumerate(data):
+        dip = el in ('B', 'O')
+        b += [C(X(i), Y(v), 4.5, OR if dip else YE), T(X(i), 216, el, IV, 11, 'middle'), T(X(i), Y(v) - 10, str(v), OR if dip else MU, 9.5, 'middle')]
+    b += [T(X(2), Y(801) + 24, '2p 전자 하나 → 떼기 쉬움', OR, 9.5, 'middle'), T(X(5), Y(1314) + 24, '2p⁴ 짝지은 전자 반발', OR, 9.5, 'middle')]
+    return svg(660, 228, b, '2주기 원소의 제1이온화 에너지. B와 O에서 경향이 꺾인다')
+
+
+def borncycle():
+    # energy levels (kJ/mol) relative to Na(s) + 1/2 Cl2(g) = 0
+    steps = [('Na(s) + ½Cl₂(g)', 0), ('Na(g) + ½Cl₂(g)', 108), ('Na⁺(g) + e⁻ + ½Cl₂(g)', 604), ('Na⁺(g) + e⁻ + Cl(g)', 726), ('Na⁺(g) + Cl⁻(g)', 377), ('NaCl(s)', -411)]
+    Y = lambda e: 190 - e * .2
+    b = []
+    xs = [40, 130, 220, 310, 400, 490]
+    for i, (name, e) in enumerate(steps):
+        b += [L(xs[i], Y(e), xs[i] + 80, Y(e), IV if i not in (0, 5) else YE, 2), T(xs[i] + 40, Y(e) - 6, name, IV, 8.5, 'middle')]
+    labels = ['승화 +108', '이온화 +496', '½ 해리 +122', '전자 친화도 −349', '격자 에너지 U']
+    for i in range(5):
+        y1, y2 = Y(steps[i][1]), Y(steps[i + 1][1])
+        c = OR if steps[i + 1][1] > steps[i][1] else SKY
+        b.append(arrow(xs[i] + 80, y1, xs[i + 1] + 4, y2, c, 1.3))
+        b.append(T((xs[i] + 80 + xs[i + 1]) / 2 + 8, (y1 + y2) / 2, labels[i], c, 9))
+    b += [L(30, Y(0), 30, Y(-411), YE, 1.2, .8, '3 3'), T(36, Y(-200), 'ΔH°f = −411', YE, 10),
+          T(560, 40, 'U = −411 − (108 + 496 + 122 − 349)', MU, 10, 'middle'), T(560, 56, '= −788 kJ/mol', YE, 10, 'middle')]
+    return svg(660, 290, b, 'NaCl의 Born–Haber 순환: 각 단계 엔탈피의 합이 생성 엔탈피와 같다')
+
+
+def _mo_column(x0, title, order, electrons):
+    # order: list of (label, count) bottom to top; electrons: list per orbital of ('ud'|'u'|'')
+    b = [T(x0 + 90, 18, title, YE, 11, 'middle')]
+    y, i = 250, 0
+    for label, n in order:
+        w = 34 if n == 1 else 30
+        xs = [x0 + 90 - w / 2] if n == 1 else [x0 + 52, x0 + 96]
+        for k in range(n):
+            occ = electrons[i]; i += 1
+            star = '*' in label
+            b.append(L(xs[k], y, xs[k] + w, y, OR if star else YE, 2))
+            arrows = {'ud': '↑↓', 'u': '↑', '': ''}[occ]
+            b.append(T(xs[k] + w / 2, y - 4, arrows, IV, 12, 'middle'))
+        b.append(T(x0 + 150, y + 4, label, OR if '*' in label else MU, 10))
+        y -= 30
+    return b
+
+
+def modiagram():
+    n2 = [('σ2s', 1), ('σ*2s', 1), ('π2p', 2), ('σ2p', 1), ('π*2p', 2), ('σ*2p', 1)]
+    o2 = [('σ2s', 1), ('σ*2s', 1), ('σ2p', 1), ('π2p', 2), ('π*2p', 2), ('σ*2p', 1)]
+    b = _mo_column(20, 'N₂ (B₂, C₂, N₂의 순서)', n2, ['ud', 'ud', 'ud', 'ud', 'ud', '', '', ''])
+    b += _mo_column(330, 'O₂ (O₂, F₂의 순서)', o2, ['ud', 'ud', 'ud', 'ud', 'ud', 'u', 'u', ''])
+    b += [T(110, 272, '결합 8, 반결합 2 → 결합차수 3, 반자기성', MU, 10, 'middle'), T(420, 272, '결합 8, 반결합 4 → 결합차수 2, 홀전자 2 → 상자기성', MU, 10, 'middle')]
+    return svg(660, 282, b, '2주기 동핵 이원자 분자의 원자가 MO 준위: N₂까지는 π2p가 σ2p보다 낮고 O₂부터 뒤바뀐다')
+
+
+FIGS.update({f.__name__: f for f in [ietrend, borncycle, modiagram]})
+
+
+# --- 대학수학 1학기 (5–7장) ---
+
+def _plot(fn, x0, x1, X, Y, ylo=-1e9, yhi=1e9, steps=300):
+    segs, cur = [], []
+    for i in range(steps + 1):
+        x = x0 + (x1 - x0) * i / steps
+        try:
+            y = fn(x)
+        except (ValueError, ZeroDivisionError, OverflowError):
+            y = None
+        if y is None or not (ylo <= y <= yhi):
+            if cur: segs.append(cur); cur = []
+            continue
+        cur.append((X(x), Y(y)))
+    if cur: segs.append(cur)
+    return segs
+
+
+def _axes(cx, cy, x0, x1, y0, y1, X, Y):
+    return [L(X(x0), Y(0), X(x1), Y(0), MU, .8), L(X(0), Y(y0), X(0), Y(y1), MU, .8)]
+
+
+def invmirror():
+    s = 42
+    X = lambda x: 200 + x * s
+    Y = lambda y: 120 - y * s
+    b = _axes(0, 0, -3.5, 4.5, -2.6, 2.6, X, Y)
+    b.append(P([(X(-2.6), Y(-2.6)), (X(2.6), Y(2.6))], MU, 1, .8, dash='4 4'))
+    b += [P(sg, YE, 2) for sg in _plot(math.exp, -3.5, .95, X, Y, -3, 2.6)]
+    b += [P(sg, OR, 2) for sg in _plot(lambda x: math.log(x) if x > 0 else None, .07, 4.5, X, Y, -2.6, 3)]
+    a = .6
+    pa, pb = (X(a), Y(math.exp(a))), (X(math.exp(a)), Y(a))
+    b += [C(*pa, 4, YE), C(*pb, 4, OR), P([pa, pb], IV, 1, .5, dash='2 3'),
+          T(pa[0] - 8, pa[1] - 6, '(a, b)', YE, 10, 'end'), T(pb[0] + 6, pb[1] + 14, '(b, a)', OR, 10),
+          T(X(-3.3), Y(.35), 'y = eˣ', YE, 11), T(X(3), Y(1.45), 'y = ln x', OR, 11), T(X(2.1), Y(2.55), 'y = x', MU, 10),
+          T(420, 70, '역함수 그래프 = y = x에 대한 대칭', IV, 11), T(420, 95, '(a, b)가 f 위에 있으면 (b, a)는 f⁻¹ 위에', MU, 10),
+          T(420, 120, '접선의 기울기도 뒤집혀요', MU, 10), T(420, 145, "(f⁻¹)′(b) = 1 / f′(a)", YE, 12), T(420, 175, '예: (ln x)′ = 1 / eʸ = 1/x', OR, 10)]
+    return svg(660, 240, b, '지수함수와 로그함수는 y = x에 대해 대칭이고, 대응점의 접선 기울기는 서로 역수')
+
+
+def growth():
+    b = [arrow(40, 120, 630, 120, MU, 1.2)]
+    items = [('ln x', '로그', IV), ('√x', '거듭제곱 xᵖ', IV), ('x¹⁰⁰', '(p > 0)', IV), ('1.01ˣ', '지수 aˣ', YE), ('3ˣ', '(a > 1)', YE), ('x!', '팩토리얼', OR), ('xˣ', '', OR)]
+    for i, (f, lab, c) in enumerate(items):
+        x = 70 + i * 86
+        b += [C(x, 120, 5, c), T(x, 100, f, c, 13, 'middle'), T(x, 146, lab, MU, 10, 'middle')]
+        if i < len(items) - 1:
+            b.append(T(x + 43, 125, '≪', MU, 12, 'middle'))
+    b += [T(335, 40, 'x → ∞일 때 오른쪽으로 갈수록 더 빨리 커진다', IV, 11, 'middle'),
+          T(335, 190, 'f ≪ g  ⟺  f/g → 0  ⟺  f = o(g)', YE, 11, 'middle'), T(335, 212, '같은 무리 안에서는 지수가 큰 쪽이 빠르다: 2ˣ = o(3ˣ), log 밑만 다르면 같은 속도', MU, 10, 'middle')]
+    return svg(670, 228, b, '증가 속도의 서열: 로그 ≪ 거듭제곱 ≪ 지수 ≪ 팩토리얼')
+
+
+def arctrig():
+    b = []
+    panels = [('y = sin⁻¹x', math.asin, -1, 1, '[−1, 1] → [−π/2, π/2]', (-math.pi / 2, math.pi / 2)),
+              ('y = cos⁻¹x', math.acos, -1, 1, '[−1, 1] → [0, π]', (0, math.pi)),
+              ('y = tan⁻¹x', math.atan, -4, 4, 'ℝ → (−π/2, π/2)', (-math.pi / 2, math.pi / 2))]
+    for k, (lab, fn, x0, x1, rng, (lo, hi)) in enumerate(panels):
+        ox = 25 + k * 215
+        sx = 70 if x1 == 1 else 22
+        X = lambda x, ox=ox, sx=sx: ox + 95 + x * sx
+        Y = lambda y: 130 - y * 32
+        b += [L(ox + 5, Y(0), ox + 190, Y(0), MU, .8), L(X(0), 20, X(0), 225, MU, .8)]
+        for v, t in ((lo, ''), (hi, '')):
+            b.append(L(ox + 5, Y(v), ox + 190, Y(v), MU, .8, .7, '3 4'))
+        b += [T(X(0) - 4, Y(hi) - 3, {math.pi: 'π', math.pi / 2: 'π/2'}[hi], MU, 9, 'end'),
+              T(X(0) - 4, Y(lo) + 11, {0: '', -math.pi / 2: '−π/2'}[lo], MU, 9, 'end')]
+        b += [P(sg, OR, 2) for sg in _plot(fn, x0, x1, X, Y)]
+        if x1 == 1:
+            b += [C(X(-1), Y(fn(-1)), 3, OR), C(X(1), Y(fn(1)), 3, OR), T(X(-1), Y(0) + 13, '−1', MU, 9, 'middle'), T(X(1), Y(0) + 13, '1', MU, 9, 'middle')]
+        b += [T(ox + 95, 245, lab, YE, 12, 'middle'), T(ox + 95, 262, rng, MU, 10, 'middle')]
+    return svg(670, 272, b, '역삼각함수: 원래 함수의 정의역을 잘라 일대일로 만든 뒤 뒤집은 것')
+
+
+def hyperbolic():
+    b = []
+    s = 30
+    X = lambda x: 130 + x * s
+    Y = lambda y: 150 - y * s
+    b += _axes(0, 0, -3.6, 3.6, -2.4, 4.4, X, Y)
+    b += [P(sg, MU, 1, .9, dash='4 3') for sg in _plot(lambda x: math.exp(x) / 2, -3.6, 3.6, X, Y, -3, 4.4)]
+    b += [P(sg, MU, 1, .9, dash='4 3') for sg in _plot(lambda x: math.exp(-x) / 2, -3.6, 3.6, X, Y, -3, 4.4)]
+    b += [P(sg, YE, 2) for sg in _plot(math.cosh, -3.6, 3.6, X, Y, -3, 4.4)]
+    b += [P(sg, OR, 2) for sg in _plot(math.sinh, -3.6, 3.6, X, Y, -2.4, 4.4)]
+    b += [T(X(-3.5), Y(3.1), 'cosh x', YE, 11), T(X(2.1), Y(2.3), 'sinh x', OR, 11), T(X(-3.5), Y(.85), '½e⁻ˣ', MU, 9), T(X(2.6), Y(.85), '½eˣ', MU, 9),
+          C(X(0), Y(1), 3, YE), T(X(0) + 6, Y(1) + 12, '1', YE, 9)]
+    X2 = lambda x: 380 + x * 34
+    Y2 = lambda y: 150 - y * 45
+    b += _axes(0, 0, -3.6, 3.6, -1.6, 1.6, X2, Y2)
+    b += [L(X2(-3.6), Y2(1), X2(3.6), Y2(1), MU, .8, .7, '3 4'), L(X2(-3.6), Y2(-1), X2(3.6), Y2(-1), MU, .8, .7, '3 4')]
+    b += [P(sg, SKY, 2) for sg in _plot(math.tanh, -3.6, 3.6, X2, Y2)]
+    b += [T(X2(1.2), Y2(.55), 'tanh x', SKY, 11), T(X2(-3.5), Y2(1) - 4, 'y = 1', MU, 9), T(X2(2.3), Y2(-1) + 12, 'y = −1', MU, 9)]
+    b += [T(530, 32, 'cosh²x − sinh²x = 1', IV, 11, 'middle'), T(530, 52, '(cosh t, sinh t)는 쌍곡선 x² − y² = 1 위의 점', MU, 10, 'middle')]
+    return svg(670, 270, b, '쌍곡선함수: cosh와 sinh는 ½eˣ와 ½e⁻ˣ의 합과 차, tanh는 −1과 1 사이')
+
+
+def trigsub():
+    b = []
+    tri = [('√(a² − x²)', 'x = a sin θ', 'a', 'x', '√(a² − x²)', '1 − sin²θ = cos²θ'),
+           ('√(a² + x²)', 'x = a tan θ', '√(a² + x²)', 'x', 'a', '1 + tan²θ = sec²θ'),
+           ('√(x² − a²)', 'x = a sec θ', 'x', '√(x² − a²)', 'a', 'sec²θ − 1 = tan²θ')]
+    for k, (form, sub, hyp, opp, adj, ident) in enumerate(tri):
+        ox = 20 + k * 220
+        A, B, Cc = (ox + 20, 170), (ox + 170, 170), (ox + 170, 60)
+        b.append(f'<path d="M{A[0]} {A[1]}L{B[0]} {B[1]}L{Cc[0]} {Cc[1]}Z" fill="{YE}" fill-opacity=".07" stroke="{IV}" stroke-width="1.3"/>')
+        b += [P([(B[0] - 10, B[1]), (B[0] - 10, B[1] - 10), (B[0], B[1] - 10)], MU, 1),
+              f'<path d="M{A[0] + 26} {A[1]} A26 26 0 0 0 {A[0] + 26 * 0.807:.1f} {A[1] - 26 * 0.591:.1f}" fill="none" stroke="{OR}" stroke-width="1.2"/>',
+              T(A[0] + 32, A[1] - 6, 'θ', OR, 11),
+              T((A[0] + Cc[0]) / 2 - 8, (A[1] + Cc[1]) / 2 - 6, hyp, IV, 10, 'end'), T(B[0] + 6, (B[1] + Cc[1]) / 2 + 4, opp, IV, 10), T((A[0] + B[0]) / 2, B[1] + 16, adj, IV, 10, 'middle'),
+              T(ox + 95, 22, form, YE, 12, 'middle'), T(ox + 95, 40, sub, OR, 11, 'middle'), T(ox + 95, 212, ident, MU, 10, 'middle')]
+    return svg(700, 222, b, '삼각치환: 근호 꼴에 맞는 직각삼각형을 그리면 θ로 바꾸고 돌아오는 길이 보인다')
+
+
+def ptest():
+    b = []
+    X = lambda x: 60 + x * 95
+    Y = lambda y: 200 - y * 150
+    b += [L(X(0), Y(0), X(6.3), Y(0), MU, .8), L(X(0), Y(0) + 8, X(0), 15, MU, .8)]
+    pts = [(X(x), Y(1 / x ** 2)) for x in [1 + i * .02 for i in range(266)]]
+    b.append(f'<path d="M{X(1)} {Y(0)}L' + 'L'.join(f'{x:.1f} {y:.1f}' for x, y in pts) + f'L{X(6.3)} {Y(0)}Z" fill="{YE}" fill-opacity=".22"/>')
+    b += [P(sg, OR, 1.8) for sg in _plot(lambda x: 1 / x, .2, 6.3, X, Y, 0, 1.25)]
+    b += [P(sg, YE, 2) for sg in _plot(lambda x: 1 / x ** 2, .2, 6.3, X, Y, 0, 1.25)]
+    b += [L(X(1), Y(0), X(1), Y(1), MU, .8, .8, '3 3'), T(X(1), Y(0) + 14, '1', MU, 9, 'middle'),
+          T(X(.45), Y(1.18), 'y = 1/x²', YE, 11), T(X(2.7), Y(.47), 'y = 1/x', OR, 11),
+          T(X(4.2), 60, '∫₁^∞ 1/x² dx = 1   (p = 2 > 1, 수렴)', YE, 11, 'middle'), T(X(4.2), 82, '∫₁^∞ 1/x dx = ∞   (p = 1, 발산)', OR, 11, 'middle'),
+          T(X(4.2), 106, '둘 다 0으로 가지만 빠르기가 다르다', MU, 10, 'middle')]
+    return svg(670, 222, b, 'p판정: 1/x²의 꼬리 넓이는 유한하지만 1/x의 꼬리 넓이는 무한하다')
+
+
+def revolve():
+    b = []
+    f = lambda x: .55 + .35 * math.sin(x * 1.1) + .12 * x
+    X = lambda x: 40 + x * 55
+    Y = lambda y: 130 - y * 70
+    b += [L(X(-.2), Y(0), X(5.2), Y(0), MU, .8)]
+    up = [(X(x), Y(f(x))) for x in [.3 + i * .02 for i in range(221)]]
+    dn = [(X(x), Y(-f(x))) for x in [.3 + i * .02 for i in range(221)]]
+    b += [P(up, YE, 2), P(dn, YE, 1.2, .5, dash='4 3')]
+    for xx in (.3, 4.7):
+        r = f(xx) * 70
+        b.append(f'<ellipse cx="{X(xx):.1f}" cy="{Y(0):.1f}" rx="{r * .25:.1f}" ry="{r:.1f}" fill="none" stroke="{MU}" stroke-width="1"/>')
+    xs = 2.6
+    r = f(xs) * 70
+    b += [f'<ellipse cx="{X(xs):.1f}" cy="{Y(0):.1f}" rx="{r * .25:.1f}" ry="{r:.1f}" fill="{OR}" fill-opacity=".3" stroke="{OR}" stroke-width="1.4"/>',
+          L(X(xs), Y(0), X(xs), Y(f(xs)), OR, 1.2), T(X(xs) + 6, Y(f(xs) / 2), 'f(x)', OR, 10),
+          T(X(xs), 250, '단면 = 원판, 넓이 π f(x)²', OR, 10, 'middle'), T(X(.1), Y(0) - 6, 'x축', MU, 9, 'end')]
+    ox = 380
+    b += [L(ox, 190, ox + 260, 190, MU, .8), L(ox + 10, 200, ox + 10, 30, MU, .8)]
+    g = lambda t: 150 - 70 * math.sin(t / 60) - t * .15
+    b.append(P([(ox + 10 + t, g(t)) for t in range(0, 250, 3)], YE, 2))
+    p1, p2 = (ox + 30, g(20)), (ox + 80, g(70))
+    b += [L(*p1, *p2, OR, 2), L(p1[0], p1[1], p2[0], p1[1], IV, 1, .8, '3 3'), L(p2[0], p1[1], *p2, IV, 1, .8, '3 3'),
+          T((p1[0] + p2[0]) / 2, p1[1] + 14, 'Δx', IV, 10, 'middle'), T(p2[0] + 5, (p1[1] + p2[1]) / 2 + 4, 'Δy', IV, 10),
+          T((p1[0] + p2[0]) / 2 - 8, (p1[1] + p2[1]) / 2 - 8, 'ΔL', OR, 11, 'end'),
+          T(ox + 130, 222, 'ΔL = √(1 + (Δy/Δx)²) Δx', IV, 11, 'middle'), T(ox + 130, 242, '→ L = ∫ √(1 + f′(x)²) dx', YE, 11, 'middle')]
+    return svg(670, 260, b, '회전체의 부피는 원판 단면을 쌓아서, 곡선의 길이는 작은 빗변을 더해서 구한다')
+
+
+FIGS.update({f.__name__: f for f in [invmirror, growth, arctrig, hyperbolic, trigsub, ptest, revolve]})

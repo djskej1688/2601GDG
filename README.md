@@ -13,3 +13,7 @@ The intro uses a high-quality 1080p/30fps H.264 encode with its MP4 index at the
 The original Saira Stencil and Noto Serif KR outlines and variable axes are retained in WOFF2. Current-copy subsets load first; disjoint full-font Unicode ranges keep later text covered. Keep the bundled SIL Open Font License notices with all font derivatives.
 
 Files in `assets/optimized/` have content hashes in their names and a one-year immutable browser cache. When changing a file, generate a new hash/name and update its reference; never replace bytes under an existing hash. Regular pages and styles retain the default revalidation policy.
+
+## Input notes
+
+`input.html` is generated. Edit the subject data in `tools/build_input.py`, then run `python3 tools/build_input.py .` from the repository root. Notes are concept summaries written for the site; exam questions and course materials are not reproduced.
