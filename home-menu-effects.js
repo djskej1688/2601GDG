@@ -1,5 +1,5 @@
-/* Home menu effects: seeding dodges the pointer and never opens,
- * dandelion scatters like seeds on the wind, untitled melts downward.
+/* Home menu effects: seeding dodges the pointer and never opens.
+ * dandelion (seeds on the wind) and untitled (melting) come from nav-effects.js.
  * Plain DOM + canvas, no dependencies. Reduced motion skips the effects. */
 (() => {
   'use strict';
@@ -7,12 +7,9 @@
   if (!menu) return;
   const seeding = menu.querySelector('[data-effect="dodge"]');
   const toast = document.querySelector('#not-ready');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const rand = (a, b) => a + Math.random() * (b - a);
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const smooth = (a, b, t) => { const q = clamp((t - a) / (b - a), 0, 1); return q * q * (3 - 2 * q); };
   const menuOpen = () => !menu.inert && menu.closest('.open');
-  let busy = false;
 
   /* ---------- seeding: never clickable ---------- */
   let ox = 0, oy = 0, near = false, attempts = 0, lastAttempt = 0, toastTimer = 0, homeTimer = 0, lastTouch = -1e9;
@@ -94,180 +91,15 @@
     addEventListener('resize', () => { ox = 0; oy = 0; place(); });
   }
 
-  /* ---------- shared: draw a link's text into a canvas ---------- */
-  function snapshot(link) {
-    const range = document.createRange();
-    range.selectNodeContents(link);
-    const r = range.getBoundingClientRect();
-    const cs = getComputedStyle(link);
-    const dpr = Math.min(2, devicePixelRatio || 1), pad = 4;
-    const w = r.width + pad * 2, h = r.height + pad * 2;
-    const c = document.createElement('canvas');
-    c.width = Math.ceil(w * dpr); c.height = Math.ceil(h * dpr);
-    const x = c.getContext('2d');
-    x.scale(dpr, dpr);
-    x.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
-    x.fillStyle = cs.color;
-    x.textBaseline = 'alphabetic';
-    const m = x.measureText(link.textContent);
-    const asc = m.fontBoundingBoxAscent || m.actualBoundingBoxAscent;
-    const desc = m.fontBoundingBoxDescent || m.actualBoundingBoxDescent;
-    x.fillText(link.textContent, pad, pad + (r.height - asc - desc) / 2 + asc);
-    return { canvas: c, ctx: x, left: r.left - pad, top: r.top - pad, w, h, dpr, color: cs.color };
+  /* ---------- dandelion and untitled: shared effects from nav-effects.js ---------- */
+  const shared = window.dandellasEffects;
+  if (shared) {
+    shared.bind(menu.querySelector('[data-effect="seeds"]'), 'seeds');
+    shared.bind(menu.querySelector('[data-effect="melt"]'), 'melt');
   }
-  function overlay(left, top, width, height, className) {
-    const dpr = Math.min(2, devicePixelRatio || 1);
-    const c = document.createElement('canvas');
-    c.className = 'menu-effect' + (className ? ' ' + className : '');
-    c.setAttribute('aria-hidden', 'true');
-    c.width = Math.ceil(width * dpr); c.height = Math.ceil(height * dpr);
-    c.style.left = `${left}px`; c.style.top = `${top}px`;
-    c.style.width = `${width}px`; c.style.height = `${height}px`;
-    document.body.append(c);
-    const ctx = c.getContext('2d');
-    ctx.scale(dpr, dpr);
-    return { c, ctx };
-  }
-  function run(duration, frame, done) {
-    const start = performance.now();
-    const step = now => {
-      const t = (now - start) / 1000;
-      frame(t);
-      if (t * 1000 < duration) requestAnimationFrame(step); else done();
-    };
-    requestAnimationFrame(step);
-  }
-
-  /* ---------- dandelion: seeds scatter on the wind ---------- */
-  function scatter(link, go) {
-    const s = snapshot(link);
-    const data = s.ctx.getImageData(0, 0, s.canvas.width, s.canvas.height).data;
-    const parts = [];
-    const stride = Math.max(1, Math.round(s.dpr));
-    for (let py = 0; py < s.canvas.height; py += stride) {
-      for (let px = 0; px < s.canvas.width; px += stride) {
-        if (data[(py * s.canvas.width + px) * 4 + 3] < 110) continue;
-        const x = s.left + px / s.dpr, y = s.top + py / s.dpr;
-        const along = (x - s.left) / s.w;
-        parts.push({
-          x0: x, y0: y,
-          delay: along * .42 + rand(0, .22),
-          vx: rand(70, 190), vy: rand(-75, -18),
-          sway: rand(8, 22), freq: rand(1.6, 3.4), phase: rand(0, 6.3),
-          seed: Math.random() < .16, tilt: rand(-.5, .3), size: rand(.7, 1.15)
-        });
-      }
-    }
-    const view = overlay(0, 0, innerWidth, innerHeight);
-    const ctx = view.ctx;
-    link.classList.add('is-released');
-    ctx.strokeStyle = ctx.fillStyle = s.color;
-    run(1900, t => {
-      ctx.clearRect(0, 0, innerWidth, innerHeight);
-      for (const p of parts) {
-        const u = t - p.delay;
-        if (u <= 0) { ctx.globalAlpha = 1; ctx.fillRect(p.x0, p.y0, 1.05, 1.05); continue; }
-        const lift = 1 - Math.exp(-u * 1.6);
-        const x = p.x0 + p.vx * u + 26 * u * u;
-        const y = p.y0 + p.vy * u * lift - 10 * u * u + Math.sin(u * p.freq + p.phase) * p.sway * lift;
-        const a = 1 - smooth(.55, 1.45, u);
-        if (a <= 0) continue;
-        ctx.globalAlpha = a;
-        if (!p.seed) { ctx.beginPath(); ctx.arc(x, y, p.size * (1 - .35 * lift), 0, Math.PI * 2); ctx.fill(); continue; }
-        // A tiny dandelion seed: achene, stalk and a pappus that opens as it flies.
-        const open = smooth(0, .45, u), ang = p.tilt + Math.sin(u * p.freq + p.phase) * .35;
-        const len = 7 + 3 * open, tx = x + Math.sin(ang) * len, ty = y - Math.cos(ang) * len;
-        ctx.lineWidth = .55;
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(tx, ty); ctx.stroke();
-        ctx.beginPath(); ctx.ellipse(x, y, .7, 1.4, ang, 0, Math.PI * 2); ctx.fill();
-        ctx.lineWidth = .4;
-        for (let k = 0; k < 7; k++) {
-          const fa = ang - Math.PI / 2 + (k / 6 - .5) * Math.PI * .95 * (.35 + .65 * open) + Math.PI / 2;
-          const fl = 3.2 + 2.6 * open;
-          ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx + Math.sin(fa) * fl, ty - Math.cos(fa) * fl); ctx.stroke();
-        }
-      }
-      ctx.globalAlpha = 1;
-    }, go);
-  }
-
-  /* ---------- untitled: melts into liquid and runs down ---------- */
-  function melt(link, go) {
-    const s = snapshot(link);
-    const cols = s.canvas.width, rows = s.canvas.height;
-    const data = s.ctx.getImageData(0, 0, cols, rows).data;
-    const bottom = new Float32Array(cols).fill(-1);
-    for (let i = 0; i < cols; i++) for (let j = rows - 1; j >= 0; j--) if (data[(j * cols + i) * 4 + 3] > 120) { bottom[i] = j / s.dpr; break; }
-    const inked = [...bottom.keys()].filter(i => bottom[i] >= 0);
-    if (!inked.length) { go(); return; }
-    const count = Math.max(6, Math.round(s.w / 9));
-    const drips = Array.from({ length: count }, (_, k) => {
-      const i = inked[Math.floor((k + Math.random()) / count * inked.length)];
-      return { i, x: i / s.dpr, y: bottom[i], w: rand(1.8, 3.4), amp: rand(.45, 1), start: rand(.05, .45), drop: rand(.95, 1.35) };
-    });
-    const phase = [rand(0, 6), rand(0, 6)];
-    const width = s.w + 40, height = Math.max(s.h + 60, innerHeight - s.top + 20);
-    const view = overlay(s.left - 20, s.top, width, height, 'goo');
-    const ctx = view.ctx;
-    link.classList.add('is-released');
-    ctx.fillStyle = s.color;
-    const bump = new Float32Array(cols);
-    run(1800, t => {
-      ctx.clearRect(0, 0, width, height);
-      const sag = smooth(0, 1.1, t) * 7;
-      ctx.globalAlpha = 1 - smooth(1.3, 1.8, t);
-      bump.fill(0);
-      const lens = drips.map(d => { const u = Math.max(0, t - d.start); return d.amp * (u * u * 300 + u * 22); });
-      drips.forEach((d, k) => {
-        const reach = Math.min(lens[k], 8) * s.dpr;
-        for (let i = Math.max(0, d.i - 10 * s.dpr); i < Math.min(cols, d.i + 10 * s.dpr); i++) {
-          bump[i] = Math.max(bump[i], reach * Math.exp(-((i - d.i) ** 2) / (2 * (d.w * s.dpr) ** 2)) / s.dpr);
-        }
-      });
-      // The word sags and its lower edge bulges toward each drip; the top stays anchored.
-      const drain = 1 - .55 * smooth(.7, 1.6, t);
-      ctx.save(); ctx.globalAlpha *= drain;
-      for (let i = 0; i < cols; i++) {
-        const wave = (Math.sin(i * .06 / s.dpr + phase[0]) + Math.sin(i * .17 / s.dpr + phase[1])) * .25 + .5;
-        const down = sag * (.5 + wave) + bump[i];
-        ctx.drawImage(s.canvas, i, 0, 1, rows, 20 + i / s.dpr, down * .25, 1 / s.dpr + .4, s.h + down * .75);
-      }
-      ctx.restore();
-      // Tapered streams with a heavier bead at the tip; late ones let go of a drop.
-      drips.forEach((d, k) => {
-        const len = lens[k];
-        if (len < 1) return;
-        const x = 20 + d.x, y0 = d.y + sag * .8;
-        const steps = Math.max(2, Math.ceil(len / 1.4));
-        for (let n = 0; n <= steps; n++) {
-          const q = n / steps;
-          ctx.beginPath(); ctx.arc(x + Math.sin(q * 3 + d.i) * .4, y0 + q * len, d.w * (.5 - .22 * q), 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.beginPath(); ctx.arc(x, y0 + len, d.w * .62, 0, Math.PI * 2); ctx.fill();
-        const fall = t - d.start - d.drop * .6;
-        if (fall > 0) { ctx.beginPath(); ctx.arc(x, y0 + len + fall * fall * 900 + fall * 120, d.w * .55, 0, Math.PI * 2); ctx.fill(); }
-      });
-    }, go);
-  }
-
-  const effects = { seeds: scatter, melt };
-  menu.querySelectorAll('[data-effect="seeds"], [data-effect="melt"]').forEach(link => {
-    link.addEventListener('click', e => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      if (reduce.matches) return;
-      e.preventDefault();
-      if (busy) return;
-      busy = true;
-      const go = () => { location.href = link.href; };
-      try { effects[link.dataset.effect](link, go); } catch (_) { go(); }
-    });
-  });
 
   // Coming back through the browser history restores a clean menu.
   addEventListener('pageshow', () => {
-    busy = false;
-    document.querySelectorAll('.menu-effect').forEach(c => c.remove());
-    menu.querySelectorAll('.is-released').forEach(a => a.classList.remove('is-released'));
     if (seeding) { ox = 0; oy = 0; place(); }
     if (toast) toast.hidden = true;
   });
