@@ -82,7 +82,9 @@
       return texture2D(uGlyphs,vec2((glyph+q.x)/12.0,1.0-q.y)).a;
     }
     void main(){
-      vec3 bg=vec3(0.008,0.018,0.012);
+      // Same dark-green radial glow as the other project films (#0b2015 → #06150d → #020906).
+      float glowR=length((vUV-vec2(0.48,0.49))*uResolution)/(0.62*max(uResolution.x,uResolution.y));
+      vec3 bg=glowR<0.55?mix(vec3(0.043,0.125,0.082),vec3(0.024,0.082,0.051),glowR/0.55):mix(vec3(0.024,0.082,0.051),vec3(0.008,0.035,0.024),clamp((glowR-0.55)/0.45,0.0,1.0));
       vec4 surface=texture2D(uScene,vUV);
       if(uProgress>=0.999){gl_FragColor=vec4(mix(bg,surface.rgb,surface.a),1.0);return;}
       vec2 pixel=vUV*uResolution;
@@ -94,7 +96,7 @@
       float glyph=floor(clamp(lum*1.37,0.0,0.999)*12.0);
       vec2 q=fract(pixel/stepSize);
       float flicker=0.96+0.04*hash(cell+floor(uTime*5.0));
-      vec3 ascii=mix(bg,vec3(0.33+lum*0.46),ink(glyph,q)*sampleColor.a*flicker);
+      vec3 ascii=mix(bg,vec3(0.33+lum*0.46)*vec3(0.97,1.0,0.9),ink(glyph,q)*sampleColor.a*flicker);
       if(uProgress<=0.00001){gl_FragColor=vec4(ascii,1.0);return;}
       if(surface.a<0.001&&sampleColor.a<0.001){gl_FragColor=vec4(bg,1.0);return;}
       // Static contours, delays and speeds: only each mark's radius increases.

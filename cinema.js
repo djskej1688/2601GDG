@@ -59,3 +59,8 @@ window.addEventListener('hashchange',()=>choose(projects.findIndex(p=>p.id===loc
 choose(projects.findIndex(p=>p.id===(location.hash.slice(1)||body.dataset.project)),false);
 window.addEventListener('pagehide',()=>{generation++;cancelHold();cancelAnimationFrame(resizeFrame);observer.disconnect();film?.destroy();},{once:true});
 })();
+/* Clicking a project title makes "About this project" glow a few times so people notice it. */
+(()=>{const info=document.querySelector('#project-info');if(!info)return;const meta=info.closest('.work-meta');let timer=0;
+const stop=()=>{info.classList.remove('hint');if(meta)meta.classList.remove('hinting');};
+document.querySelectorAll('.work-row').forEach(row=>row.addEventListener('click',()=>{stop();void info.offsetWidth;info.classList.add('hint');if(meta)meta.classList.add('hinting');clearTimeout(timer);timer=setTimeout(stop,5200);}));
+info.addEventListener('click',()=>{clearTimeout(timer);stop();});})();
