@@ -5,17 +5,19 @@
   const NODES = [
     { id: 'dandelion', kind: 'root', label: T('dandelion'),
       copy: T('연구와 프로젝트를 모아 둔 곳입니다. 선은 각 프로젝트가 다루는 개념을 잇습니다.', 'Where the research and projects gather. Lines connect each project to the concepts it works with.') },
-    { id: 'mechanism', kind: 'project', label: T('Mechanism aware GraphRAG'), meta: 'RESEARCH · 2026 OCT', href: './project-graphrag.html',
+    { id: 'mechanism', kind: 'project', label: T('pocket2graph (pilot)'), meta: 'RESEARCH · 2026 OCT', href: './project-graphrag.html',
       copy: T('단백질 포켓 예측 결과와 생의학 지식 그래프를 한곳에 모은 뒤, GraphRAG와 VectorRAG가 언어 모델에 필요한 기록을 찾아 빠짐없이 전달하는지 확인하는 연구입니다.',
         'A study that brings protein pocket predictions and a biomedical knowledge graph together, then checks whether GraphRAG and VectorRAG find the records a language model needs and pass them on intact.') },
     { id: 'financial', kind: 'project', label: T('Financial GraphRAG'), meta: 'PROJECT · 2026 MAY', href: './project-financial.html',
       copy: T('사업보고서(10-K)를 바탕으로 지식 그래프 검색이 언제 벡터 검색보다 나은지 비교한 프로젝트입니다. 여러 회사를 비교하는 질문에서 크게 앞섰고, 채점 기준의 오류를 바로잡은 과정도 함께 기록했습니다.',
         'A project comparing when knowledge-graph retrieval beats vector retrieval on annual reports (10-K). It was far ahead on questions comparing several companies, and the correction of a flawed answer key is documented as well.') },
-    { id: 'lattice', kind: 'project', label: T('개인의 경험을 집합으로…?', 'Experiences as sets…?'), meta: 'QUESTION · 2026 OCT', href: './project-lattice.html',
+    { id: 'lattice', kind: 'project', label: T('개인의 경험을 집합으로…?', 'Experiences as sets…?'), meta: 'UPCOMING · QUESTION · 2026 OCT', href: './project-lattice.html',
       title: T('개인의 경험을 집합으로 구조화하고 그 관계를 활용해 생성하면, 그 사람에게 의미 있으면서도 예상 밖인 아이디어를 얻을 수 있는가?',
         'If personal experiences are structured as sets and the relations between them are used for generation, can that produce ideas that are both meaningful and unexpected to that person?'),
       copy: T('개인의 경험을 집합으로 구조화하고, 집합 사이의 관계를 생성에 활용하는 격자 연구입니다. 현재 탐구 중인 연구 질문이며, 검증된 결과를 뜻하지 않습니다.',
         'A lattice study that structures personal experiences as sets and uses the relations between those sets for generation. It is a research question being explored, not a validated result.') },
+    { id: 'mch', kind: 'project', label: T('Mathematical Condition Hunter (MCH)'), meta: 'UPCOMING · PROJECT', href: './project-mch.html',
+      copy: T('준비 중인 프로젝트입니다. 자세한 내용은 곧 공개할 예정입니다.', 'An upcoming project. Details will be shared soon.') },
     { id: 'graphrag', kind: 'concept', label: T('GraphRAG'), copy: T('지식 그래프에서 관련 사실을 찾아 언어 모델 답변의 근거로 쓰는 검색 증강 생성(RAG) 방식.', 'Retrieval-augmented generation (RAG) that retrieves facts from a knowledge graph as evidence for a language model’s answer.') },
     { id: 'vectorrag', kind: 'concept', label: T('VectorRAG'), copy: T('문서를 임베딩 벡터로 바꾸고, 질문과 비슷한 문단을 찾아 근거로 쓰는 RAG 방식.', 'RAG that embeds documents as vectors and retrieves the passages most similar to the question.') },
     { id: 'kg', kind: 'concept', label: T('Knowledge graph'), copy: T('개체를 노드로, 개체 사이의 관계를 엣지로 표현한 데이터 구조.', 'A data structure that represents entities as nodes and the relationships between them as edges.') },
@@ -34,7 +36,7 @@
     { id: 'ideation', kind: 'concept', label: T('Idea generation'), copy: T('요소 사이의 관계를 활용해 새로운 아이디어를 만들어 내는 과정.', 'Producing new ideas by drawing on relations between existing elements.') }
   ];
   const EDGES = [
-    ['dandelion', 'mechanism'], ['dandelion', 'financial'], ['dandelion', 'lattice'],
+    ['dandelion', 'mechanism'], ['dandelion', 'financial'], ['dandelion', 'lattice'], ['dandelion', 'mch'],
     ['mechanism', 'graphrag'], ['mechanism', 'vectorrag'], ['mechanism', 'kg'], ['mechanism', 'hetionet'], ['mechanism', 'allosteric'],
     ['mechanism', 'pocket'], ['mechanism', 'afdb'], ['mechanism', 'judge'], ['mechanism', 'provenance'],
     ['financial', 'graphrag'], ['financial', 'vectorrag'], ['financial', 'kg'], ['financial', 'neo4j'], ['financial', 'tenk'],
